@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synergy — App Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<style>
+.mono{font-family:'IBM Plex Mono',monospace!important;}
+.msr{font-family:'Material Symbols Rounded';font-weight:400;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+.qp-card{border-radius:16px;overflow:hidden;position:relative;cursor:pointer;transition:transform .1s,opacity .12s;}
+.qp-card:active{transform:scale(0.98);opacity:.9;}
+.tertiary{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);}
+.section-head{font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:12px;font-weight:600;color:rgba(255,255,255,0.55);letter-spacing:-.005em;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#111;display:flex;justify-content:center;align-items:flex-start;padding:2rem 1rem;font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;min-height:100vh;}
+.phone-frame{position:relative;padding:9px;border-radius:52px;background:linear-gradient(145deg,#2d2d33 0%,#111114 30%,#0a0a0c 50%,#111114 70%,#2d2d33 100%);box-shadow:0 25px 70px rgba(0,0,0,0.75),0 0 0 1px rgba(255,255,255,0.04),inset 0 0 0 2px rgba(255,255,255,0.03);flex-shrink:0;}
+.phone-frame::before{content:'';position:absolute;inset:4px;border-radius:48px;border:1px solid rgba(0,0,0,0.6);pointer-events:none;}
+.phone-side-btn{position:absolute;background:linear-gradient(90deg,#1a1a1e,#3a3a40,#1a1a1e);box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);}
+.btn-silent{left:-2.5px;top:96px;width:3px;height:26px;border-radius:2px 0 0 2px;}
+.btn-vup{left:-3px;top:140px;width:3px;height:48px;border-radius:2px 0 0 2px;}
+.btn-vdown{left:-3px;top:196px;width:3px;height:48px;border-radius:2px 0 0 2px;}
+.btn-power{right:-3px;top:156px;width:3px;height:76px;border-radius:0 2px 2px 0;}
+.phone{width:300px;height:660px;border-radius:44px;border:1px solid rgba(255,255,255,0.08);position:relative;overflow:hidden;display:flex;flex-direction:column;background:#0d0d10;flex-shrink:0;}
+.notch{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:80px;height:24px;border-radius:12px;z-index:50;background:#0d0d10;}
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;position:relative;z-index:2;display:none;}
+.screen.active{display:block;animation:screenIn .22s cubic-bezier(.2,0,0,1);}
+#screen-flo.active{display:flex;flex-direction:column;overflow:hidden;}
+@keyframes screenIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.screen::-webkit-scrollbar{display:none;}
+.dock-wrap{position:relative;z-index:10;padding:5px 0 20px;display:flex;justify-content:center;flex-shrink:0;background:#0d0d10;transition:background .25s;}
+.dock-pill{background:rgba(18,18,22,0.98);border:1px solid rgba(255,255,255,0.09);border-radius:28px;padding:7px 14px;display:flex;align-items:center;gap:9px;position:relative;}
+.dock-indicator{position:absolute;left:14px;top:7px;width:38px;height:38px;border-radius:50%;overflow:hidden;z-index:0;pointer-events:none;transition:transform .28s cubic-bezier(.3,0,.2,1);}
+.dock-indicator::before,.brand-orb::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,#c4b5fd 0%,#a78bfa 22%,#7c3aed 50%,#4338ca 75%,#1e1b4b 95%);background-size:240% 240%;animation:brandFlow 18s ease-in-out infinite;}
+.dock-indicator::after,.brand-orb::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(103,232,249,0.7) 0%,rgba(103,232,249,0) 55%);opacity:0;animation:cyanFlash 23s ease-in-out infinite;mix-blend-mode:screen;}
+.brand-orb{position:relative;border-radius:50%;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .12s ease;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;}
+.brand-orb:active{transform:scale(0.93);}
+.brand-orb > *,.brand-orb{z-index:1;}
+.brand-orb{isolation:isolate;}
+@keyframes cyanFlash{0%,44%,56%,100%{opacity:0;}50%{opacity:1;}}
+#profile-overlay > *{flex-shrink:0;}
+.prof-card{margin:0 14px;background:rgba(255,255,255,0.025);border:1.5px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;}
+.prof-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer;transition:background .14s;}
+.prof-row:hover{background:rgba(255,255,255,0.03);}
+.prof-ico{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.prof-ico .msr{font-size:15px;color:rgba(255,255,255,0.55);}
+.prof-lbl{flex:1;font-size:12px;color:rgba(255,255,255,0.85);font-family:'Plus Jakarta Sans',-apple-system,sans-serif;}
+.prof-val{font-family:'IBM Plex Mono',monospace;font-size:9px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.06em;}
+.prof-chev{font-size:14px!important;color:rgba(255,255,255,0.22)!important;}
+.prof-toggle{width:30px;height:18px;border-radius:11px;background:rgba(255,255,255,0.1);position:relative;flex-shrink:0;cursor:pointer;transition:background .2s;}
+.prof-toggle.on{background:linear-gradient(135deg,#4338ca,#7c3aed);}
+.prof-thumb{width:14px;height:14px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s cubic-bezier(.4,0,.2,1);}
+.prof-toggle.on .prof-thumb{left:14px;}
+.di{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform .15s;position:relative;z-index:1;}
+.di:active{transform:scale(0.87)!important;}
+.di svg{width:18px;height:18px;position:relative;z-index:2;}
+@keyframes brandFlow{0%,100%{background-position:20% 25%;}25%{background-position:75% 35%;}50%{background-position:65% 80%;}75%{background-position:25% 70%;}}
+@keyframes brandShift{0%,100%{filter:hue-rotate(0deg);}50%{filter:hue-rotate(-14deg);}}
+.overlay{position:absolute;inset:0;z-index:40;display:none;flex-direction:column;align-items:center;justify-content:center;}
+.pill-btn{height:28px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.28);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.65);font-size:10px;font-weight:500;padding:0 12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;transition:transform .1s,opacity .1s;}
+.pill-btn:active{transform:scale(0.92);opacity:.8;}
+.pill-btn.primary{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.55);color:rgba(255,255,255,0.96);font-weight:600;padding:0 16px;}
+.browse-pill{height:34px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.55);font-size:11px;font-weight:500;padding:0 14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;flex-shrink:0;transition:transform .1s,opacity .12s;}
+.browse-pill.active{color:rgba(255,255,255,0.96);}
+.browse-pill:active{transform:scale(0.93);opacity:0.8;}
+.focus-btn{flex:1;height:48px;border-radius:14px;border:1.5px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.03);color:rgba(255,255,255,0.55);font-size:13px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;transition:transform .1s,background .25s,border-color .25s,color .25s,box-shadow .25s;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 16px;}
+.focus-btn:active{transform:scale(0.97);}
+.focus-btn .msr{opacity:.9;line-height:1;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;}
+.focus-btn span:last-child{line-height:1;display:inline-flex;align-items:center;}
+.dock-wrap{position:relative;}
+.dock-wrap::before{content:'';position:absolute;top:-22px;left:0;right:0;height:22px;background:linear-gradient(transparent,var(--dock-bg,#0d0d10));pointer-events:none;z-index:1;}
+.session-row{background:rgba(255,255,255,0.03);border:1.5px solid rgba(255,255,255,0.07);border-radius:14px;padding:13px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:background .14s,border-color .14s,transform .1s;}
+.session-row:active{background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.13);transform:scale(0.98);}
+/* ── Aurora halo ── */
+#breath-ring{width:260px;height:260px;position:relative;display:flex;align-items:center;justify-content:center;}
+.halo-scale{position:absolute;inset:0;border-radius:50%;animation:haloIdle 9s ease-in-out infinite;transition:transform 4s cubic-bezier(.4,0,.2,1);will-change:transform;}
+.halo-scale-b{animation:haloIdle 11s ease-in-out -3s infinite reverse;}
+.halo-aurora{position:absolute;inset:0;border-radius:50%;filter:blur(14px);animation:haloSpin 34s linear infinite;will-change:transform;}
+.halo-aurora-2{filter:blur(28px);opacity:.55;animation:haloSpinRev 54s linear infinite;}
+.halo-core{position:relative;z-index:3;width:196px;height:196px;border-radius:50%;background:#000;display:flex;align-items:center;justify-content:center;pointer-events:auto;cursor:pointer;transition:transform .12s ease;}
+.halo-core:active{transform:scale(0.97);}
+#breath-visual{display:none;flex-direction:column;align-items:center;gap:8px;}
+#breath-count{font-size:40px;font-weight:300;color:rgba(255,255,255,0.94);font-variant-numeric:tabular-nums;letter-spacing:-.03em;line-height:1;}
+#breath-label{font-size:10px;font-weight:500;color:rgba(255,255,255,0.55);letter-spacing:.18em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;}
+.flo-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.45);animation:floDot 1.1s ease-in-out infinite;}
+@keyframes floDot{0%,80%,100%{transform:scale(0.6);opacity:.35;}40%{transform:scale(1);opacity:.95;}}
+@keyframes haloSpin{to{transform:rotate(360deg);}}
+@keyframes haloSpinRev{to{transform:rotate(-360deg);}}
+@keyframes haloIdle{0%,100%{transform:scale(1);}50%{transform:scale(1.045);}}
+/* Drift — meditation/sleep/journal: gentle dreamy pulse */
+@keyframes haloDrift{0%,100%{transform:scale(1);}50%{transform:scale(1.025);}}
+/* Tide — yoga/pilates: wave-like swell with subtle tilt */
+@keyframes haloTide{0%,100%{transform:scale(1) rotate(0deg);}33%{transform:scale(1.06) rotate(3deg);}66%{transform:scale(1.03) rotate(-2.5deg);}}
+/* Pulse — strength/hiit: sharp percussive beat */
+@keyframes haloPulse{0%,38%,100%{transform:scale(0.96);}48%{transform:scale(1.12);}60%{transform:scale(1.0);}}
+/* Surge — movement/cardio: elastic asymmetric morph */
+@keyframes haloSurge{0%,100%{transform:scaleX(1) scaleY(1) rotate(0);}25%{transform:scaleX(1.09) scaleY(0.94) rotate(2.5deg);}50%{transform:scaleX(0.95) scaleY(1.07) rotate(0);}75%{transform:scaleX(1.05) scaleY(0.97) rotate(-2.5deg);}}
+/* Mode: drift — slow + dreamy (meditation, sleep, journal) */
+#breath-ring.mode-drift .halo-scale{animation:haloDrift 14s ease-in-out infinite;}
+#breath-ring.mode-drift .halo-scale-b{animation:haloDrift 18s ease-in-out -6s infinite reverse;}
+#breath-ring.mode-drift .halo-aurora{animation:haloSpin 70s linear infinite;}
+#breath-ring.mode-drift .halo-aurora-2{animation:haloSpinRev 95s linear infinite;}
+/* Mode: tide — wave-like (yoga, pilates) */
+#breath-ring.mode-tide .halo-scale{animation:haloTide 9s ease-in-out infinite;}
+#breath-ring.mode-tide .halo-scale-b{animation:haloTide 11s ease-in-out -3s infinite reverse;}
+#breath-ring.mode-tide .halo-aurora{animation:haloSpin 32s linear infinite;}
+#breath-ring.mode-tide .halo-aurora-2{animation:haloSpinRev 44s linear infinite;}
+/* Mode: pulse — sharp beat (strength, hiit) */
+#breath-ring.mode-pulse .halo-scale{animation:haloPulse 1.9s cubic-bezier(.6,0,.2,1) infinite;}
+#breath-ring.mode-pulse .halo-scale-b{animation:haloPulse 1.9s cubic-bezier(.6,0,.2,1) -0.95s infinite;}
+#breath-ring.mode-pulse .halo-aurora{animation:haloSpin 16s linear infinite;}
+#breath-ring.mode-pulse .halo-aurora-2{animation:haloSpinRev 22s linear infinite;}
+/* Mode: surge — fast elastic morph (movement, cardio) */
+#breath-ring.mode-surge .halo-scale{animation:haloSurge 4.5s cubic-bezier(.4,0,.6,1) infinite;}
+#breath-ring.mode-surge .halo-scale-b{animation:haloSurge 6s cubic-bezier(.4,0,.6,1) -2s infinite reverse;}
+#breath-ring.mode-surge .halo-aurora{animation:haloSpin 9s linear infinite;}
+#breath-ring.mode-surge .halo-aurora-2{animation:haloSpinRev 14s linear infinite;}
+</style>
+</head>
+<body>
+<div class="phone-frame">
+<div class="phone-side-btn btn-silent"></div>
+<div class="phone-side-btn btn-vup"></div>
+<div class="phone-side-btn btn-vdown"></div>
+<div class="phone-side-btn btn-power"></div>
+<div class="phone" id="phone">
+<div class="notch" id="notch"></div>
+
+<!-- ══════════════ SESSIONS ══════════════ -->
+<div class="screen active" id="screen-sessions">
+  <div style="height:48px;"></div>
+  <div style="padding:16px 20px 0;">
+    <div class="mono" style="font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,0.18);margin-bottom:5px;">Tue, Apr 16</div>
+    <div style="font-size:28px;font-weight:700;color:rgba(255,255,255,0.92);letter-spacing:-.03em;">Sessions</div>
+  </div>
+  <div style="margin:16px 14px 0;border-radius:22px;overflow:hidden;position:relative;cursor:pointer;" onclick="openSession('Box Breathing for Anxiety','breathwork','8 min','linear-gradient(135deg,#1e1b4b 0%,#4338ca 45%,#7c3aed 100%)')">
+    <div style="position:absolute;inset:0;background:linear-gradient(135deg,#1e1b4b 0%,#4338ca 45%,#7c3aed 100%);"></div>
+    <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(167,139,250,0.3);filter:blur(30px);pointer-events:none;"></div>
+    <div style="position:relative;z-index:1;padding:18px 18px 17px;">
+      <div class="mono" style="font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(235,225,255,0.85);margin-bottom:8px;display:flex;align-items:center;gap:5px;"><div style="width:3px;height:3px;border-radius:50%;background:rgba(235,225,255,0.9);"></div>Today's Pick</div>
+      <div style="font-size:22px;font-weight:800;color:rgba(255,255,255,0.98);letter-spacing:-.025em;line-height:1.15;margin-bottom:5px;">Box Breathing<br>for Anxiety</div>
+      <div class="mono" style="font-size:10px;color:rgba(235,228,255,0.82);margin-bottom:10px;">8 Min · Breathwork</div>
+      <div style="font-size:11px;color:rgba(235,228,255,0.7);line-height:1.5;margin-bottom:16px;">Even four-count breathing steadies the nervous system. Good for when the feeling has no clear source.</div>
+      <div style="display:flex;justify-content:flex-end;">
+        <button class="pill-btn primary" onclick="event.stopPropagation();openSession('Box Breathing for Anxiety','breathwork','8 min','linear-gradient(135deg,#1e1b4b 0%,#4338ca 45%,#7c3aed 100%)')">Start</button>
+      </div>
+    </div>
+  </div>
+  <div style="padding:20px 20px 10px;font-size:12px;font-weight:500;color:rgba(255,255,255,0.35);">Explore</div>
+  <div style="display:flex;gap:8px;padding:0 14px 12px;">
+    <button class="focus-btn" id="focus-mental" onclick="selectFocus('mental')"><span class="msr" style="font-size:18px;">self_improvement</span><span>Mental</span></button>
+    <button class="focus-btn" id="focus-movement" onclick="selectFocus('movement')"><span class="msr" style="font-size:18px;">directions_run</span><span>Movement</span></button>
+  </div>
+  <div id="subcat-pills" style="display:flex;gap:6px;padding:0 14px 20px;overflow-x:auto;scrollbar-width:none;"></div>
+  <div style="padding:0 20px 9px;display:flex;justify-content:space-between;align-items:center;">
+    <div style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.35);" id="quick-picks-label">Quick Picks</div>
+    <div style="font-size:10px;color:rgba(255,255,255,0.18);">See All</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px;padding:0 14px 22px;" id="quick-picks-list"></div>
+</div>
+
+<!-- ══════════════ FLO ══════════════ -->
+<div class="screen" id="screen-flo">
+  <div id="flo-scroll" style="flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;">
+    <div style="height:48px;"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;padding:26px 24px 0;text-align:center;">
+      <div style="display:flex;align-items:center;justify-content:center;margin-bottom:12px;">
+        <svg width="40" height="40" viewBox="0 0 32 32">
+          <defs>
+            <radialGradient id="brand-grad-logo" cx="16" cy="16" r="22" gradientUnits="userSpaceOnUse">
+              <animate attributeName="cx" values="10;22;20;12;10" dur="18s" repeatCount="indefinite"/>
+              <animate attributeName="cy" values="12;14;22;20;12" dur="18s" repeatCount="indefinite"/>
+              <stop offset="0">
+                <animate attributeName="stop-color" values="#a78bfa;#a78bfa;#c4b5fd;#67e8f9;#c4b5fd;#a78bfa;#a78bfa" keyTimes="0;0.42;0.47;0.5;0.53;0.58;1" dur="23s" repeatCount="indefinite"/>
+              </stop>
+              <stop offset="0.55">
+                <animate attributeName="stop-color" values="#a78bfa;#7c3aed;#4338ca;#7c3aed;#a78bfa" dur="18s" repeatCount="indefinite"/>
+              </stop>
+              <stop offset="1">
+                <animate attributeName="stop-color" values="#1e1b4b;#4338ca;#1e1b4b;#4338ca;#1e1b4b" dur="18s" repeatCount="indefinite"/>
+              </stop>
+            </radialGradient>
+          </defs>
+          <path d="M31.76,31.66c-8.51-4.9-14.83-11.64-15.67-29.29,0-.05-.04-.09-.1-.09s-.09.04-.1.09C15.06,20.01,8.74,26.75.24,31.66c-.18.1-.07.38.13.33,10.26-2.48,20.98-2.48,31.25,0,.2.05.31-.23.13-.33Z" fill="url(#brand-grad-logo)"/>
+        </svg>
+      </div>
+      <div style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:26px;font-weight:700;color:rgba(255,255,255,0.96);letter-spacing:-.02em;margin-bottom:10px;">Synergy</div>
+      <div class="mono" style="font-size:8px;color:rgba(167,139,250,0.55);line-height:1.6;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;">Move your body, move your mind.</div>
+    </div>
+    <div style="padding:20px 16px 8px;display:flex;flex-direction:column;gap:10px;" id="flo-msgs">
+      <div style="display:flex;gap:7px;align-items:flex-end;">
+        <div style="width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 32 32"><path d="M31.76,31.66c-8.51-4.9-14.83-11.64-15.67-29.29,0-.05-.04-.09-.1-.09s-.09.04-.1.09C15.06,20.01,8.74,26.75.24,31.66c-.18.1-.07.38.13.33,10.26-2.48,20.98-2.48,31.25,0,.2.05.31-.23.13-.33Z" fill="#a78bfa"/></svg></div>
+        <div style="max-width:210px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:16px;border-bottom-left-radius:3px;padding:10px 13px;font-size:12px;color:rgba(255,255,255,0.82);line-height:1.5;">Hey Rory. What's on your mind today?</div>
+      </div>
+    </div>
+  </div>
+  <div style="padding:6px 14px 8px;background:#0d0d10;flex-shrink:0;">
+    <div style="background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.12);border-radius:22px;display:flex;align-items:center;padding:8px 8px 8px 14px;gap:7px;">
+      <input id="flo-input" type="text" placeholder="Ask Synergy anything..." style="flex:1;background:transparent;border:none;outline:none;font-size:12px;color:rgba(255,255,255,0.82);font-family:'Plus Jakarta Sans',-apple-system,sans-serif;" onkeydown="if(event.key==='Enter')sendFlo()"/>
+      <div onclick="sendFlo()" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#5b21b6,#7c3aed);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:transform .1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6.5 2.5L10 6l-3.5 3.5" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ME ══════════════ -->
+<div class="screen" id="screen-me" style="background:#080809;">
+  <div style="height:48px;"></div>
+  <div style="padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div class="tertiary" style="margin-bottom:4px;">Vibe Check</div>
+      <div style="font-size:28px;font-weight:700;color:rgba(255,255,255,0.88);letter-spacing:-.03em;">Me</div>
+    </div>
+    <div class="brand-orb" onclick="openProfile()" style="width:30px;height:30px;color:rgba(255,255,255,0.96);" title="Profile"><span class="msr" style="position:relative;z-index:2;font-size:16px;">person</span></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:16px 14px 0;">
+    <div onclick="openStatOverlay('month')" style="background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 14px;cursor:pointer;transition:background .14s,transform .1s;" onmouseenter="this.style.background='rgba(255,255,255,0.07)'" onmouseleave="this.style.background='rgba(255,255,255,0.04)'"><div style="font-size:24px;font-weight:500;color:rgba(255,255,255,0.88);letter-spacing:-.03em;line-height:1;" id="me-count">12</div><div class="tertiary" style="margin-top:4px;">This Month</div></div>
+    <div onclick="openStatOverlay('streak')" style="background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 14px;cursor:pointer;transition:background .14s;" onmouseenter="this.style.background='rgba(255,255,255,0.07)'" onmouseleave="this.style.background='rgba(255,255,255,0.04)'"><div style="font-size:24px;font-weight:500;color:rgba(255,255,255,0.88);letter-spacing:-.03em;line-height:1;">6</div><div class="tertiary" style="margin-top:4px;">Day Streak</div></div>
+    <div onclick="openStatOverlay('sleep')" style="background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 14px;cursor:pointer;transition:background .14s;" onmouseenter="this.style.background='rgba(255,255,255,0.07)'" onmouseleave="this.style.background='rgba(255,255,255,0.04)'"><div style="font-size:24px;font-weight:500;color:rgba(255,255,255,0.88);letter-spacing:-.03em;line-height:1;">8.4</div><div class="tertiary" style="margin-top:4px;">Avg Sleep (Hrs)</div></div>
+    <div onclick="openStatOverlay('mood')" style="background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 14px;cursor:pointer;transition:background .14s;" onmouseenter="this.style.background='rgba(255,255,255,0.07)'" onmouseleave="this.style.background='rgba(255,255,255,0.04)'"><div style="font-size:24px;font-weight:500;color:rgba(255,255,255,0.88);letter-spacing:-.03em;line-height:1;">74%</div><div class="tertiary" style="margin-top:4px;">Mood Score</div></div>
+  </div>
+  <div style="padding:26px 14px 14px;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.6);">How Synergy Sees Your Days</div>
+  </div>
+  <div id="cal" style="padding:0 14px 24px;display:flex;flex-direction:column;gap:16px;"></div>
+</div>
+
+<!-- ══════════════ SESSION OVERLAY ══════════════ -->
+<div class="overlay" id="session-overlay" style="background:#000;">
+  <!-- close -->
+  <div onclick="endSession()" style="position:absolute;top:38px;left:22px;z-index:5;cursor:pointer;width:28px;height:28px;display:flex;align-items:center;justify-content:center;">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+  </div>
+  <!-- heading (top) -->
+  <div style="position:absolute;top:92px;left:0;right:0;text-align:center;padding:0 28px;z-index:3;">
+    <div id="session-type-tag" class="mono" style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:6px;"></div>
+    <div id="session-name" style="font-size:17px;font-weight:600;color:rgba(255,255,255,0.96);letter-spacing:-.01em;line-height:1.25;"></div>
+    <div id="session-copy" style="font-size:11px;color:rgba(255,255,255,0.55);line-height:1.5;margin-top:10px;max-width:240px;margin-left:auto;margin-right:auto;"></div>
+  </div>
+  <!-- halo center -->
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;pointer-events:none;">
+    <div id="breath-ring">
+      <div class="halo-scale"><div class="halo-aurora" id="halo-a1"></div></div>
+      <div class="halo-scale halo-scale-b"><div class="halo-aurora halo-aurora-2" id="halo-a2"></div></div>
+      <div class="halo-core" onclick="pressHalo()">
+        <div id="breath-visual">
+          <div id="breath-label"></div>
+          <div id="breath-count"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- hidden legacy nodes kept to satisfy existing logic -->
+  <div id="session-timer" style="display:none;"></div>
+  <div id="prog-bar" style="display:none;"></div>
+  <!-- tap-for-next hint (movement sessions only) -->
+  <div id="cue-hint" style="position:absolute;bottom:104px;left:0;right:0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,0.5);z-index:3;display:none;pointer-events:none;">TAP FOR NEXT</div>
+  <!-- bottom controls -->
+  <div style="position:absolute;bottom:46px;left:0;right:0;display:flex;gap:10px;justify-content:center;z-index:3;">
+    <button onclick="endSession()" style="background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.15);border-radius:18px;padding:11px 24px;font-size:12px;color:rgba(255,255,255,0.6);cursor:pointer;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;transition:background .15s;" onmouseenter="this.style.background='rgba(255,255,255,0.1)'" onmouseleave="this.style.background='rgba(255,255,255,0.05)'">End</button>
+    <button id="session-btn" onclick="toggleSession()" style="background:rgba(255,255,255,0.9);border:none;border-radius:18px;padding:11px 28px;font-size:12px;font-weight:600;color:#0a0a0d;cursor:pointer;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;">Pause</button>
+  </div>
+</div>
+
+<!-- ══════════════ DONE OVERLAY ══════════════ -->
+<div class="overlay" id="done-overlay" style="background:#0d0d10;">
+  <div style="position:absolute;inset:0;pointer-events:none;" id="done-bg"></div>
+  <div style="position:relative;z-index:1;text-align:center;padding:0 28px;width:100%;">
+    <svg width="52" height="52" viewBox="0 0 52 52" fill="none" style="margin-bottom:16px;"><circle cx="26" cy="26" r="24" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/><path d="M15 26l8 8 14-16" stroke="rgba(255,255,255,0.85)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div style="font-size:22px;font-weight:500;color:rgba(255,255,255,0.92);letter-spacing:-.02em;margin-bottom:5px;">Session Complete</div>
+    <div id="done-name" style="font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:36px;"></div>
+    <div style="display:flex;gap:8px;justify-content:center;">
+      <button onclick="closeDone();switchTab('sessions')" style="background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.15);border-radius:18px;padding:10px 20px;font-size:12px;color:rgba(255,255,255,0.55);cursor:pointer;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;">Browse More</button>
+      <button id="done-btn" onclick="closeDone();switchTab('me')" style="border:none;border-radius:18px;padding:10px 22px;font-size:12px;font-weight:600;color:white;cursor:pointer;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;">See My Log</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ DAY DETAIL ══════════════ -->
+<div class="overlay" id="day-overlay" style="background:#000;z-index:45;flex-direction:column;align-items:stretch;animation:none;overflow:hidden;">
+  <div id="day-grad-bg" style="position:absolute;inset:0;"></div>
+  <div style="position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,0.14);filter:blur(60px);pointer-events:none;"></div>
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.15) 0%,transparent 35%,rgba(0,0,0,0.35) 70%,rgba(0,0,0,0.72) 100%);pointer-events:none;"></div>
+  <div onclick="closeDayOverlay()" style="position:absolute;top:38px;left:22px;z-index:5;cursor:pointer;width:28px;height:28px;display:flex;align-items:center;justify-content:center;">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+  </div>
+  <div style="position:absolute;top:92px;left:24px;right:24px;z-index:3;">
+    <div id="day-month" class="mono" style="font-size:10px;color:rgba(255,255,255,0.72);letter-spacing:.14em;text-transform:uppercase;font-weight:600;margin-bottom:6px;"></div>
+    <div id="day-num" style="font-size:62px;font-weight:700;color:rgba(255,255,255,0.98);letter-spacing:-.045em;line-height:0.92;"></div>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:0;padding:28px 24px 44px;z-index:3;">
+    <div id="day-tag" class="mono" style="font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.88);margin-bottom:8px;display:flex;align-items:center;gap:6px;"></div>
+    <div id="day-name" style="font-size:22px;font-weight:700;color:#fff;letter-spacing:-.025em;line-height:1.15;margin-bottom:10px;"></div>
+    <div id="day-desc" style="font-size:12px;color:rgba(255,255,255,0.82);line-height:1.55;"></div>
+    <div id="day-meta" class="mono" style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.15);display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,0.7);letter-spacing:.08em;text-transform:uppercase;"></div>
+  </div>
+</div>
+
+<!-- ══════════════ STAT DETAIL ══════════════ -->
+<div class="overlay" id="stat-overlay" style="background:#080809;z-index:46;flex-direction:column;align-items:stretch;">
+  <div onclick="closeStatOverlay()" style="position:absolute;top:38px;left:22px;z-index:5;cursor:pointer;width:28px;height:28px;display:flex;align-items:center;justify-content:center;">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+  </div>
+  <div style="padding:92px 22px 18px;">
+    <div id="stat-ov-label" class="mono" style="font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;"></div>
+    <div style="display:flex;align-items:baseline;gap:7px;">
+      <div id="stat-ov-value" style="font-size:52px;font-weight:700;color:rgba(255,255,255,0.92);letter-spacing:-.04em;line-height:1;"></div>
+      <div id="stat-ov-unit" class="mono" style="font-size:12px;color:rgba(255,255,255,0.3);letter-spacing:.04em;"></div>
+    </div>
+  </div>
+  <div id="stat-ov-accent" style="height:2px;margin:0 22px;border-radius:2px;"></div>
+  <div id="stat-ov-chart" style="padding:22px 22px 0;flex:1;overflow:hidden;"></div>
+</div>
+
+<!-- ══════════════ PROFILE / SETTINGS ══════════════ -->
+<div class="overlay" id="profile-overlay" style="background:#080809;z-index:47;flex-direction:column;align-items:stretch;justify-content:flex-start;overflow-y:auto;scrollbar-width:none;">
+  <div onclick="closeProfile()" style="position:absolute;top:38px;left:22px;z-index:5;cursor:pointer;width:28px;height:28px;display:flex;align-items:center;justify-content:center;">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+  </div>
+  <div style="padding:88px 22px 18px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+    <div class="brand-orb" style="width:72px;height:72px;font-size:26px;font-weight:700;color:rgba(255,255,255,0.96);margin-bottom:14px;cursor:default;"><span style="position:relative;z-index:2;">R</span></div>
+    <div style="font-size:20px;font-weight:700;color:rgba(255,255,255,0.96);letter-spacing:-.02em;margin-bottom:4px;">Rory O'Donnell</div>
+    <div class="mono" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(167,139,250,0.55);">Member · Feb 2026</div>
+  </div>
+
+  <div class="tertiary" style="padding:16px 24px 8px;">Account</div>
+  <div class="prof-card">
+    <div class="prof-row"><div class="prof-ico"><span class="msr">mail</span></div><div class="prof-lbl">Email</div><div class="prof-val">rory@synergy.app</div><span class="msr prof-chev">chevron_right</span></div>
+    <div class="prof-row"><div class="prof-ico"><span class="msr">workspace_premium</span></div><div class="prof-lbl">Subscription</div><div class="prof-val">Synergy Plus</div><span class="msr prof-chev">chevron_right</span></div>
+    <div class="prof-row" style="border-bottom:none;"><div class="prof-ico"><span class="msr">link</span></div><div class="prof-lbl">Connected Apps</div><div class="prof-val">2 active</div><span class="msr prof-chev">chevron_right</span></div>
+  </div>
+
+  <div class="tertiary" style="padding:16px 24px 8px;">Preferences</div>
+  <div class="prof-card">
+    <div class="prof-row"><div class="prof-ico"><span class="msr">notifications</span></div><div class="prof-lbl">Daily Reminder</div><div class="prof-val">7:30 AM</div><span class="msr prof-chev">chevron_right</span></div>
+    <div class="prof-row"><div class="prof-ico"><span class="msr">bedtime</span></div><div class="prof-lbl">Quiet Hours</div><div class="prof-val">10pm – 7am</div><span class="msr prof-chev">chevron_right</span></div>
+    <div class="prof-row"><div class="prof-ico"><span class="msr">vibration</span></div><div class="prof-lbl">Haptics</div><div class="prof-toggle on" onclick="toggleProfSwitch(this)"><div class="prof-thumb"></div></div></div>
+    <div class="prof-row" style="border-bottom:none;"><div class="prof-ico"><span class="msr">volume_up</span></div><div class="prof-lbl">Session Sounds</div><div class="prof-toggle on" onclick="toggleProfSwitch(this)"><div class="prof-thumb"></div></div></div>
+  </div>
+
+  <div class="tertiary" style="padding:16px 24px 8px;">Health</div>
+  <div class="prof-card">
+    <div class="prof-row"><div class="prof-ico"><span class="msr">favorite</span></div><div class="prof-lbl">Apple Health Sync</div><div class="prof-toggle on" onclick="toggleProfSwitch(this)"><div class="prof-thumb"></div></div></div>
+    <div class="prof-row" style="border-bottom:none;"><div class="prof-ico"><span class="msr">fitness_center</span></div><div class="prof-lbl">Workout Import</div><div class="prof-toggle on" onclick="toggleProfSwitch(this)"><div class="prof-thumb"></div></div></div>
+  </div>
+
+  <div class="tertiary" style="padding:16px 24px 8px;">Privacy</div>
+  <div class="prof-card">
+    <div class="prof-row"><div class="prof-ico"><span class="msr">download</span></div><div class="prof-lbl">Export Data</div><span class="msr prof-chev">chevron_right</span></div>
+    <div class="prof-row" style="border-bottom:none;"><div class="prof-ico"><span class="msr">delete</span></div><div class="prof-lbl" style="color:rgba(248,113,113,0.85);">Delete Account</div><span class="msr prof-chev" style="color:rgba(248,113,113,0.55);">chevron_right</span></div>
+  </div>
+
+  <div class="tertiary" style="padding:16px 24px 8px;">About</div>
+  <div class="prof-card">
+    <div class="prof-row"><div class="prof-ico"><span class="msr">info</span></div><div class="prof-lbl">Version</div><div class="prof-val">1.0.0</div></div>
+    <div class="prof-row"><div class="prof-ico"><span class="msr">description</span></div><div class="prof-lbl">Terms of Service</div><span class="msr prof-chev">chevron_right</span></div>
+    <div class="prof-row"><div class="prof-ico"><span class="msr">shield</span></div><div class="prof-lbl">Privacy Policy</div><span class="msr prof-chev">chevron_right</span></div>
+    <div class="prof-row" style="border-bottom:none;"><div class="prof-ico"><span class="msr">help</span></div><div class="prof-lbl">Help &amp; Support</div><span class="msr prof-chev">chevron_right</span></div>
+  </div>
+
+  <div style="padding:18px 22px 36px;display:flex;justify-content:center;">
+    <button onclick="closeProfile()" style="background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.15);border-radius:18px;padding:11px 28px;font-size:12px;color:rgba(255,255,255,0.7);cursor:pointer;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;">Sign Out</button>
+  </div>
+</div>
+
+<!-- ══════════════ DOCK ══════════════ -->
+<div class="dock-wrap" id="dock-wrap" style="--dock-bg:#0d0d10;">
+  <div class="dock-pill">
+    <div class="dock-indicator" id="dock-indicator"></div>
+    <div class="di" id="di-sessions" onclick="switchTab('sessions')"><svg viewBox="0 0 20 20" fill="none"><path d="M5 17V8m3.5 9V4m3.5 13v-7" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+    <div class="di" id="di-flo" onclick="switchTab('flo')"><svg viewBox="0 0 20 20" fill="none"><path d="M10 2C10 2 10 8 15 10C10 12 10 18 10 18C10 18 10 12 5 10C10 8 10 2 10 2Z" fill="rgba(167,139,250,0.4)"/></svg></div>
+    <div class="di" id="di-me" onclick="switchTab('me')"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6.5" stroke="rgba(103,232,249,0.35)" stroke-width="1.3"/><circle cx="10" cy="10" r="2" fill="rgba(103,232,249,0.3)"/></svg></div>
+  </div>
+</div>
+
+</div>
+</div>
+<script>
+// ── Icon paths ───────────────────────────────────────
+const _pS=`M26.19,10.24c-2.45,0-4.44,1.99-4.44,4.44,0,2.01,1.34,3.72,3.18,4.26v10.54h-7.67V8.7c1.84-.55,3.18-2.25,3.18-4.26,0-2.45-1.99-4.44-4.44-4.44s-4.44,1.99-4.44,4.44c0,2.01,1.34,3.72,3.18,4.26v20.77h-7.67v-13.95c1.84-.55,3.18-2.25,3.18-4.26,0-2.45-1.99-4.44-4.44-4.44s-4.44,1.99-4.44,4.44c0,2.01,1.34,3.72,3.18,4.26v15.02c0,.8.65,1.45,1.45,1.45h20c.8,0,1.45-.65,1.45-1.45v-11.61c1.84-.55,3.18-2.25,3.18-4.26,0-2.45-1.99-4.44-4.44-4.44ZM13.62,4.44c0-1.31,1.07-2.38,2.38-2.38s2.38,1.07,2.38,2.38-1.07,2.38-2.38,2.38-2.38-1.07-2.38-2.38ZM3.43,11.27c0-1.31,1.07-2.38,2.38-2.38s2.38,1.07,2.38,2.38-1.07,2.38-2.38,2.38-2.38-1.07-2.38-2.38ZM26.19,17.06c-1.31,0-2.38-1.07-2.38-2.38s1.07-2.38,2.38-2.38,2.38,1.07,2.38,2.38-1.07,2.38-2.38,2.38Z`;
+const _pF=`M31.76,31.66c-8.51-4.9-14.83-11.64-15.67-29.29,0-.05-.04-.09-.1-.09s-.09.04-.1.09C15.06,20.01,8.74,26.75.24,31.66c-.18.1-.07.38.13.33,10.26-2.48,20.98-2.48,31.25,0,.2.05.31-.23.13-.33Z`;
+const _pMr=`M16,0C7.18,0,0,7.18,0,16s7.18,16,16,16,16-7.18,16-16S24.82,0,16,0ZM16,29.21c-7.29,0-13.21-5.93-13.21-13.21S8.71,2.79,16,2.79s13.21,5.93,13.21,13.21-5.93,13.21-13.21,13.21Z`;
+const iS=(f)=>`<svg viewBox="0 0 32 32"><path d="${_pS}" fill="${f}"/></svg>`;
+const iF=(f)=>`<svg viewBox="0 0 32 32"><path d="${_pF}" fill="${f}"/></svg>`;
+const iM=(f)=>`<svg viewBox="0 0 32 32"><path d="${_pMr}" fill="${f}"/><circle cx="16" cy="16" r="3.31" fill="${f}"/></svg>`;
+// ── Tab config ────────────────────────────────────────
+const tabCfg={
+  sessions:{phoneBg:'#0d0d10',active:'di-sessions',icons:{sessions:iS('rgba(255,255,255,0.96)'),flo:iF('rgba(255,255,255,0.32)'),me:iM('rgba(255,255,255,0.32)')}},
+  flo:{phoneBg:'#0d0d10',active:'di-flo',icons:{sessions:iS('rgba(255,255,255,0.32)'),flo:iF('rgba(255,255,255,0.96)'),me:iM('rgba(255,255,255,0.32)')}},
+  me:{phoneBg:'#080809',active:'di-me',icons:{sessions:iS('rgba(255,255,255,0.32)'),flo:iF('rgba(255,255,255,0.32)'),me:iM('rgba(255,255,255,0.96)')}}
+};
+
+function switchTab(t){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+t).classList.add('active');
+  const c=tabCfg[t];
+  document.getElementById('phone').style.background=c.phoneBg;
+  document.getElementById('notch').style.background=c.phoneBg;
+  const dw=document.getElementById('dock-wrap');
+  dw.style.background=c.phoneBg;
+  dw.style.setProperty('--dock-bg',c.phoneBg);
+  ['sessions','flo','me'].forEach(id=>{const d=document.getElementById('di-'+id);d.innerHTML=c.icons[id];});
+  const slidePos={sessions:0,flo:47,me:94}; // 38px width + 9px gap
+  document.getElementById('dock-indicator').style.transform=`translateX(${slidePos[t]}px)`;
+  if(t==='flo')setTimeout(()=>{const s=document.getElementById('flo-scroll');s.scrollTop=s.scrollHeight;},50);
+}
+
+// ── Session data ──────────────────────────────────────
+const sessionData={
+  breathwork:[
+    {name:'4-7-8 Breath for Anxiety', sub:'Calm · Breathwork',   dur:8,  icon:'breath', grad:'linear-gradient(135deg,#1e1b4b,#4338ca)'},
+    {name:'Box Breathing',            sub:'Balance · Breathwork', dur:4,  icon:'breath', grad:'linear-gradient(135deg,#1e1b4b,#4338ca)'},
+    {name:'Coherent Breath',          sub:'Focus · Breathwork',   dur:6,  icon:'breath', grad:'linear-gradient(135deg,#1a1035,#5b21b6)'},
+    {name:'Wim Hof Intro',            sub:'Energy · Breathwork',  dur:10, icon:'breath', grad:'linear-gradient(135deg,#1e1b4b,#7c3aed)'},
+    {name:'Alternate Nostril',        sub:'Balance · Breathwork', dur:5,  icon:'breath', grad:'linear-gradient(135deg,#1e1b4b,#4338ca)'},
+  ],
+  meditation:[
+    {name:'Mindfulness Sit',   sub:'Calm · Mental',    dur:10, icon:'mind', grad:'linear-gradient(135deg,#0c4a6e,#0891b2)'},
+    {name:'Loving Kindness',   sub:'Heart · Mental',   dur:12, icon:'mind', grad:'linear-gradient(135deg,#0c4a6e,#0891b2)'},
+    {name:'Focus Anchor',      sub:'Focus · Mental',   dur:8,  icon:'mind', grad:'linear-gradient(135deg,#042f4b,#0891b2)'},
+    {name:'Open Awareness',    sub:'Clarity · Mental', dur:15, icon:'mind', grad:'linear-gradient(135deg,#0c4a6e,#155e75)'},
+    {name:'Body Scan',         sub:'Release · Mental', dur:10, icon:'mind', grad:'linear-gradient(135deg,#0c4a6e,#0891b2)'},
+  ],
+  sleep:[
+    {name:'Wind-Down Scan',      sub:'Sleep Prep · Mental', dur:10, icon:'sleep', grad:'linear-gradient(135deg,#042f4b,#0c4a6e)'},
+    {name:'Progressive Relax',   sub:'Sleep Prep · Body',   dur:12, icon:'sleep', grad:'linear-gradient(135deg,#042f4b,#0c4a6e)'},
+    {name:'Yoga Nidra Intro',    sub:'Deep Rest · Mental',  dur:20, icon:'sleep', grad:'linear-gradient(135deg,#020617,#042f4b)'},
+    {name:'4-7-8 for Sleep',     sub:'Calm · Breathwork',   dur:5,  icon:'breath', grad:'linear-gradient(135deg,#042f4b,#1e1b4b)'},
+    {name:'Sleep Visualization', sub:'Rest · Mental',       dur:8,  icon:'sleep', grad:'linear-gradient(135deg,#042f4b,#0c4a6e)'},
+  ],
+  movement:[
+    {name:'Dynamic Stretch',  sub:'Warmup · Movement',      dur:15, icon:'move', grad:'linear-gradient(135deg,#7f1d1d,#b91c1c)'},
+    {name:'Sun Salutation',   sub:'Flow · Movement',        dur:10, icon:'move', grad:'linear-gradient(135deg,#4c1d95,#b91c1c)'},
+    {name:'Mobility Flow',    sub:'Flexibility · Movement', dur:12, icon:'move', grad:'linear-gradient(135deg,#4c1d95,#dc2626)'},
+    {name:'Hip Opener',       sub:'Mobility · Movement',    dur:8,  icon:'move', grad:'linear-gradient(135deg,#5b21b6,#dc2626)'},
+    {name:'Walking Warm-Up',  sub:'Activation · Movement',  dur:5,  icon:'move', grad:'linear-gradient(135deg,#78350f,#dc2626)'},
+  ],
+  yoga:[
+    {name:'Vinyasa Sequence',    sub:'Movement · Yoga',     dur:20, icon:'yoga', grad:'linear-gradient(135deg,#5b21b6,#dc2626)'},
+    {name:'Gentle Morning Flow', sub:'Flow · Yoga',         dur:15, icon:'yoga', grad:'linear-gradient(135deg,#4c1d95,#b91c1c)'},
+    {name:'Yin Restorative',     sub:'Deep Stretch · Yoga', dur:25, icon:'yoga', grad:'linear-gradient(135deg,#3b0764,#991b1b)'},
+    {name:'Hatha Basics',        sub:'Foundation · Yoga',   dur:12, icon:'yoga', grad:'linear-gradient(135deg,#4c1d95,#9f1239)'},
+    {name:'Sunset Wind-Down',    sub:'Unwind · Yoga',       dur:10, icon:'yoga', grad:'linear-gradient(135deg,#5b21b6,#be123c)'},
+  ],
+  strength:[
+    {name:'Kettlebell Circuit', sub:'High Intensity · Strength', dur:20, icon:'strength', grad:'linear-gradient(135deg,#7f1d1d,#dc2626)'},
+    {name:'Bodyweight Burn',    sub:'Strength · Body',           dur:15, icon:'strength', grad:'linear-gradient(135deg,#7f1d1d,#dc2626)'},
+    {name:'Core Foundations',   sub:'Stability · Strength',      dur:10, icon:'strength', grad:'linear-gradient(135deg,#7f1d1d,#991b1b)'},
+    {name:'Push-Pull Split',    sub:'Upper Body · Strength',     dur:22, icon:'strength', grad:'linear-gradient(135deg,#7f1d1d,#ea580c)'},
+    {name:'Lower Body Focus',   sub:'Power · Strength',          dur:20, icon:'strength', grad:'linear-gradient(135deg,#7c2d12,#b91c1c)'},
+  ],
+  cardio:[
+    {name:'Zone 2 Base',         sub:'Endurance · Cardio',    dur:30, icon:'cardio', grad:'linear-gradient(135deg,#7f1d1d,#ea580c)'},
+    {name:'Steady Jog',          sub:'Aerobic · Cardio',      dur:20, icon:'cardio', grad:'linear-gradient(135deg,#991b1b,#f97316)'},
+    {name:'Tempo Run',           sub:'Threshold · Cardio',    dur:25, icon:'cardio', grad:'linear-gradient(135deg,#7c2d12,#dc2626)'},
+    {name:'Bike Spin',           sub:'Cycle · Cardio',        dur:35, icon:'cardio', grad:'linear-gradient(135deg,#78350f,#ea580c)'},
+    {name:'Jump Rope Intervals', sub:'Conditioning · Cardio', dur:12, icon:'cardio', grad:'linear-gradient(135deg,#7f1d1d,#f59e0b)'},
+  ],
+  hiit:[
+    {name:'Tabata Sprint',  sub:'20/10 · HIIT',        dur:8,  icon:'hiit', grad:'linear-gradient(135deg,#7f1d1d,#ef4444)'},
+    {name:'EMOM Ladder',    sub:'Every Minute · HIIT', dur:15, icon:'hiit', grad:'linear-gradient(135deg,#991b1b,#f97316)'},
+    {name:'Sprint Ladder',  sub:'Intervals · HIIT',    dur:12, icon:'hiit', grad:'linear-gradient(135deg,#7f1d1d,#ea580c)'},
+    {name:'AMRAP Finisher', sub:'High Output · HIIT',  dur:10, icon:'hiit', grad:'linear-gradient(135deg,#6b1d1d,#dc2626)'},
+    {name:'Hill Repeats',   sub:'Power · HIIT',        dur:14, icon:'hiit', grad:'linear-gradient(135deg,#78350f,#ef4444)'},
+  ],
+  pilates:[
+    {name:'Mat Basics',         sub:'Foundation · Pilates', dur:15, icon:'pilates', grad:'linear-gradient(135deg,#4c1d95,#be185d)'},
+    {name:'Core Series',        sub:'Control · Pilates',    dur:12, icon:'pilates', grad:'linear-gradient(135deg,#5b21b6,#9f1239)'},
+    {name:'Standing Pilates',   sub:'Balance · Pilates',    dur:18, icon:'pilates', grad:'linear-gradient(135deg,#4c1d95,#be123c)'},
+    {name:'Spine Articulation', sub:'Mobility · Pilates',   dur:10, icon:'pilates', grad:'linear-gradient(135deg,#6d28d9,#9f1239)'},
+    {name:'Full-Body Mat',      sub:'Integrated · Pilates', dur:25, icon:'pilates', grad:'linear-gradient(135deg,#5b21b6,#b91c1c)'},
+  ],
+  journal:[
+    {name:'Morning Pages',     sub:'Reflect · Journal',   dur:5, icon:'journal', grad:'linear-gradient(135deg,#1e3a5f,#2563eb)'},
+    {name:'Gratitude Check',   sub:'Mindset · Journal',   dur:3, icon:'journal', grad:'linear-gradient(135deg,#1e3a5f,#2563eb)'},
+    {name:'Mood Log',          sub:'Awareness · Journal', dur:2, icon:'journal', grad:'linear-gradient(135deg,#1e3a5f,#1d4ed8)'},
+    {name:'Weekly Review',     sub:'Growth · Journal',    dur:8, icon:'journal', grad:'linear-gradient(135deg,#1e3a5f,#2563eb)'},
+    {name:'Evening Wind-Down', sub:'Closure · Journal',   dur:4, icon:'journal', grad:'linear-gradient(135deg,#0f2240,#1d4ed8)'},
+  ],
+};
+
+const pillActiveColors={
+  breathwork:{bg:'rgba(67,56,202,0.32)',border:'rgba(99,102,241,0.5)'},
+  meditation:{bg:'rgba(8,145,178,0.28)',border:'rgba(6,182,212,0.45)'},
+  sleep:     {bg:'rgba(12,74,110,0.42)',border:'rgba(14,116,144,0.45)'},
+  movement:  {bg:'rgba(185,28,28,0.28)',border:'rgba(248,113,113,0.42)'},
+  yoga:      {bg:'rgba(124,58,237,0.28)',border:'rgba(192,132,252,0.45)'},
+  strength:  {bg:'rgba(185,28,28,0.32)',border:'rgba(248,113,113,0.4)'},
+  cardio:    {bg:'rgba(234,88,12,0.28)',border:'rgba(251,146,60,0.45)'},
+  hiit:      {bg:'rgba(220,38,38,0.32)',border:'rgba(252,165,165,0.5)'},
+  pilates:   {bg:'rgba(139,92,246,0.25)',border:'rgba(244,114,182,0.4)'},
+  journal:   {bg:'rgba(37,99,235,0.28)',border:'rgba(99,145,255,0.45)'},
+};
+
+function getIcon(type,size){
+  const sz=size||22;
+  const names={breath:'air',mind:'self_improvement',sleep:'bedtime',move:'directions_run',yoga:'spa',strength:'fitness_center',cardio:'monitor_heart',hiit:'bolt',pilates:'accessibility_new',journal:'edit_note'};
+  const n=names[type]||names.breath;
+  return `<span class="msr" style="font-size:${sz}px;color:rgba(255,255,255,0.95);font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24;">${n}</span>`;
+}
+
+function renderQuickPicks(category){
+  const list=sessionData[category]||[];
+  const container=document.getElementById('quick-picks-list');
+  container.innerHTML='';
+  list.forEach(s=>{
+    const card=document.createElement('div');
+    card.className='qp-card';
+    card.onclick=()=>openSession(s.name,category,s.dur+' min',s.grad);
+    card.innerHTML=`
+      <div style="position:absolute;inset:0;background:${s.grad};"></div>
+      <div style="position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,0.08);filter:blur(28px);pointer-events:none;"></div>
+      <div style="position:relative;z-index:1;padding:13px 14px;display:flex;align-items:center;gap:12px;">
+        <div style="display:flex;align-items:center;justify-content:center;flex-shrink:0;">${getIcon(s.icon,26)}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.98);letter-spacing:-.01em;line-height:1.25;">${s.name}</div>
+          <div class="mono" style="font-size:9px;font-weight:500;color:rgba(255,255,255,0.62);margin-top:3px;letter-spacing:.04em;">${s.sub}</div>
+        </div>
+        <div class="mono" style="font-size:9px;font-weight:600;letter-spacing:.06em;color:rgba(255,255,255,0.92);background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.22);border-radius:12px;padding:5px 10px;flex-shrink:0;">${s.dur} MIN</div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectPill(el,category){
+  document.querySelectorAll('.browse-pill').forEach(p=>{
+    p.classList.remove('active');
+    p.style.background='rgba(255,255,255,0.04)';
+    p.style.borderColor='rgba(255,255,255,0.15)';
+  });
+  const ac=pillActiveColors[category];
+  el.classList.add('active');
+  el.style.background=ac.bg;
+  el.style.borderColor=ac.border;
+  renderQuickPicks(category);
+}
+
+const focusGroups={movement:['movement','yoga','strength','cardio','hiit','pilates'],mental:['breathwork','meditation','sleep','journal']};
+const focusActive={
+  movement:{bg:'linear-gradient(135deg,#7f1d1d,#dc2626)',border:'rgba(248,113,113,0.55)',glow:'0 0 16px rgba(220,38,38,0.28)'},
+  mental:  {bg:'linear-gradient(135deg,#4c1d95,#6366f1)',border:'rgba(167,139,250,0.55)',glow:'0 0 16px rgba(124,58,237,0.3)'}
+};
+const categoryLabels={breathwork:'Breathwork',meditation:'Meditation',sleep:'Sleep',movement:'Movement',yoga:'Yoga',strength:'Strength',cardio:'Cardio',hiit:'HIIT',pilates:'Pilates',journal:'Journal'};
+let currentFocus='mental';
+
+function selectFocus(focus){
+  currentFocus=focus;
+  document.querySelectorAll('.focus-btn').forEach(b=>{
+    b.style.background='rgba(255,255,255,0.03)';
+    b.style.borderColor='rgba(255,255,255,0.12)';
+    b.style.color='rgba(255,255,255,0.55)';
+    b.style.boxShadow='';
+  });
+  const a=focusActive[focus];
+  const btn=document.getElementById('focus-'+focus);
+  btn.style.background=a.bg;btn.style.borderColor=a.border;btn.style.color='rgba(255,255,255,0.98)';btn.style.boxShadow=a.glow;
+  renderSubcats(focus);
+}
+
+function renderSubcats(focus){
+  const c=document.getElementById('subcat-pills');
+  c.innerHTML='';
+  focusGroups[focus].forEach(cat=>{
+    const btn=document.createElement('button');
+    btn.className='browse-pill';
+    btn.id='pill-'+cat;
+    btn.textContent=categoryLabels[cat];
+    btn.onclick=()=>selectPill(btn,cat);
+    c.appendChild(btn);
+  });
+  selectPill(c.firstChild,focusGroups[focus][0]);
+}
+
+window.addEventListener('load',()=>{
+  switchTab('sessions');
+  selectFocus('mental');
+});
+
+// ── Session timer ─────────────────────────────────────
+let sInt=null,sSec=0,sTotal=0,sRunning=false,sPrimed=false,sCurrent=null;
+function getGradMid(g){const m=g.match(/#[0-9a-f]{6}/gi);return m?m[Math.floor(m.length/2)]:'#7c3aed';}
+function _lighten(hex,amt){const r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16);return '#'+[r,g,b].map(c=>Math.min(255,Math.round(c+(255-c)*amt)).toString(16).padStart(2,'0')).join('');}
+function auroraFromGrad(grad,angle){
+  const colors=(grad.match(/#[0-9a-f]{6}/gi))||['#4338ca','#7c3aed'];
+  const palette=[];
+  colors.forEach(c=>palette.push(c,_lighten(c,0.35)));
+  palette.push(colors[0]);
+  return `conic-gradient(from ${angle||0}deg, ${palette.join(', ')})`;
+}
+
+function updateSD(){}
+
+// ── Breathwork cycle ──────────────────────────────────
+let breathInt=null,bPhaseIdx=0,bPhaseSec=0,bPattern=null,bMidColor='#7c3aed';
+
+const breathPatterns={
+  '4-7-8 Breath for Anxiety':[{l:'Inhale',d:4},{l:'Hold',d:7},{l:'Exhale',d:8}],
+  '4-7-8 Breath':            [{l:'Inhale',d:4},{l:'Hold',d:7},{l:'Exhale',d:8}],
+  '4-7-8 Breathwork':        [{l:'Inhale',d:4},{l:'Hold',d:7},{l:'Exhale',d:8}],
+  '4-7-8 for Sleep':         [{l:'Inhale',d:4},{l:'Hold',d:7},{l:'Exhale',d:8}],
+  'Box Breathing':           [{l:'Inhale',d:4},{l:'Hold',d:4},{l:'Exhale',d:4},{l:'Hold',d:4}],
+  'Box Breathing for Anxiety':[{l:'Inhale',d:4},{l:'Hold',d:4},{l:'Exhale',d:4},{l:'Hold',d:4}],
+  'Coherent Breath':         [{l:'Inhale',d:5},{l:'Exhale',d:5}],
+  'Wim Hof Intro':           [{l:'Inhale',d:2},{l:'Exhale',d:2}],
+  'Alternate Nostril':       [{l:'Inhale',d:4},{l:'Hold',d:2},{l:'Exhale',d:4},{l:'Hold',d:2}],
+};
+
+function _haloScales(){return document.querySelectorAll('#breath-ring .halo-scale');}
+
+function startBreathCycle(name,midColor){
+  clearInterval(breathInt);
+  bPattern=breathPatterns[name]||null;
+  if(!bPattern){document.getElementById('breath-visual').style.display='none';return;}
+  bMidColor=midColor;
+  document.getElementById('breath-visual').style.display='flex';
+  _haloScales().forEach(el=>{el.style.animation='none';el.style.transition='none';el.style.transform='scale(0.94)';});
+  bPhaseIdx=0;bPhaseSec=0;
+  setTimeout(()=>runBreathPhase(),30);
+  breathInt=setInterval(()=>{
+    if(!sRunning)return;
+    bPhaseSec++;
+    const ph=bPattern[bPhaseIdx];
+    const rem=ph.d-bPhaseSec;
+    document.getElementById('breath-count').textContent=rem>0?rem:'';
+    if(bPhaseSec>=ph.d){
+      bPhaseIdx=(bPhaseIdx+1)%bPattern.length;
+      bPhaseSec=0;
+      runBreathPhase();
+    }
+  },1000);
+}
+
+function runBreathPhase(){
+  if(!bPattern)return;
+  const ph=bPattern[bPhaseIdx];
+  document.getElementById('breath-label').textContent=ph.l;
+  document.getElementById('breath-count').textContent=ph.d;
+  const scale=ph.l==='Inhale'?1.14:(ph.l==='Exhale'?0.92:null);
+  if(scale===null)return;
+  _haloScales().forEach(el=>{el.style.transition=`transform ${ph.d}s cubic-bezier(.4,0,.2,1)`;el.style.transform=`scale(${scale})`;});
+}
+
+function stopBreathCycle(){
+  clearInterval(breathInt);
+  document.getElementById('breath-visual').style.display='none';
+  document.getElementById('breath-count').style.display='';
+  document.getElementById('breath-count').textContent='';
+  document.getElementById('breath-label').textContent='';
+  _haloScales().forEach(el=>{el.style.transition='';el.style.transform='';el.style.animation='';});
+}
+
+// ── In-halo cycling cues (per-session, mono uppercase like breathwork) ─
+// Time-based cues for breath-like / contemplative sessions
+const sessionCycles={
+  // Meditation
+  'Mindfulness Sit':[{l:'Notice',d:8},{l:'Return',d:8}],
+  'Loving Kindness':[{l:'Wish Well',d:8},{l:'Soften',d:8}],
+  'Focus Anchor':[{l:'Anchor',d:6},{l:'Return',d:6}],
+  'Open Awareness':[{l:'Observe',d:8},{l:'Allow',d:8}],
+  'Body Scan':[{l:'Notice',d:8},{l:'Soften',d:7},{l:'Release',d:7}],
+  // Journal
+  'Morning Pages':[{l:'Write',d:8},{l:'Keep Going',d:8}],
+  'Gratitude Check':[{l:'Notice',d:8},{l:'Name It',d:8}],
+  'Mood Log':[{l:'Feel',d:8},{l:'Name',d:8}],
+  'Weekly Review':[{l:'Reflect',d:8},{l:'Note',d:8}],
+  'Evening Wind-Down':[{l:'Close',d:8},{l:'Release',d:8}],
+};
+
+// Tap-to-advance movement sessions — real exercise/pose names
+const movementCycles={
+  // Movement
+  'Dynamic Stretch':['Neck Rolls','Shoulder Circles','Cat-Cow x10','Hip Circles','Leg Swings','World\'s Greatest Stretch','Thoracic Twists','Standing Forward Fold'],
+  'Sun Salutation':['Mountain Pose','Reach Up','Forward Fold','Halfway Lift','Plank','Chaturanga','Up Dog','Down Dog','Step Forward','Mountain Pose'],
+  'Mobility Flow':['90/90 Hip Switch','Deep Squat Hold','Cossack Squats','Scapular CARs','Spinal Waves','Ankle Rocks','Pigeon Stretch','Child\'s Pose'],
+  'Hip Opener':['Butterfly Stretch','Pigeon (R)','Pigeon (L)','Lizard Pose (R)','Lizard Pose (L)','Frog Pose','Happy Baby','Reclined Twist'],
+  'Walking Warm-Up':['Easy Pace 1min','Heel Walks','Toe Walks','Knee Hugs','Walking Lunges','Side Shuffles','Backward Walk','Brisk Pace'],
+  // Yoga
+  'Vinyasa Sequence':['Mountain Pose','Forward Fold','Halfway Lift','Plank','Chaturanga','Upward Dog','Downward Dog','Warrior I (R)','Warrior II (R)','Triangle (R)','Warrior I (L)','Warrior II (L)','Triangle (L)','Child\'s Pose'],
+  'Gentle Morning Flow':['Easy Seat','Seated Twist','Cat-Cow','Tabletop','Down Dog','Low Lunge (R)','Low Lunge (L)','Standing Fold','Mountain Pose'],
+  'Yin Restorative':['Butterfly (5min)','Sphinx (4min)','Saddle (5min)','Caterpillar (5min)','Reclined Twist (R)','Reclined Twist (L)','Legs Up Wall','Savasana'],
+  'Hatha Basics':['Mountain Pose','Tree Pose (R)','Tree Pose (L)','Warrior II','Triangle','Bridge','Seated Forward Fold','Savasana'],
+  'Sunset Wind-Down':['Easy Seat','Neck Stretch','Seated Fold','Supine Twist','Happy Baby','Legs Up Wall','Reclined Bound Angle','Savasana'],
+  // Strength
+  'Kettlebell Circuit':['10× KB Swings','8× Goblet Squats','10× KB Rows (R)','10× KB Rows (L)','8× Push Press','10× KB Cleans','60s Rest','10× KB Swings','12× Russian Twists','60s Rest'],
+  'Bodyweight Burn':['15× Push-Ups','20× Air Squats','10× Burpees','30s Plank','15× Lunges','20× Mountain Climbers','10× Pike Push-Ups','30s Hollow Hold'],
+  'Core Foundations':['45s Forearm Plank','15× Dead Bugs','20× Bicycle Crunches','30s Side Plank (R)','30s Side Plank (L)','15× Leg Raises','20× Russian Twists','30s Hollow Hold'],
+  'Push-Pull Split':['10× Push-Ups','10× Inverted Rows','8× Diamond Push-Ups','10× Pull-Ups','10× Pike Push-Ups','12× Bent-Over Rows','60s Rest','Repeat Round'],
+  'Lower Body Focus':['15× Goblet Squats','12× Walking Lunges','10× Romanian Deadlifts','15× Glute Bridges','20× Calf Raises','10× Bulgarian Splits (R)','10× Bulgarian Splits (L)','45s Wall Sit'],
+  // Cardio
+  'Zone 2 Base':['5min Easy Warm-Up','Steady Pace','Nose Breathing','Hold HR Zone 2','Steady Pace','Form Check','Steady Pace','5min Cool-Down'],
+  'Steady Jog':['3min Walk','5min Easy Jog','Steady Stride','Form Check','Easy Jog','Pick Up Pace','Easy Jog','3min Walk Cool-Down'],
+  'Tempo Run':['5min Warm-Up','3min Tempo','90s Recovery','3min Tempo','90s Recovery','3min Tempo','90s Recovery','5min Cool-Down'],
+  'Bike Spin':['3min Easy Spin','Build Cadence','2min @ 90rpm','30s Sprint','90s Recover','2min @ 90rpm','30s Sprint','3min Cool-Down'],
+  'Jump Rope Intervals':['30s Basic Bounce','15s Rest','30s Alternating Foot','15s Rest','30s High Knees','15s Rest','30s Double Unders','30s Cool-Down'],
+  // HIIT
+  'Tabata Sprint':['20s Sprint','10s Rest','20s Sprint','10s Rest','20s Sprint','10s Rest','20s Sprint','10s Rest','60s Recovery','Repeat Round'],
+  'EMOM Ladder':['Min 1: 5 Burpees','Min 2: 10 Squats','Min 3: 15 Sit-Ups','Min 4: 20 Lunges','Min 5: 25 Mt Climbers','Rest 60s','Repeat Round'],
+  'Sprint Ladder':['20s Sprint / 40s Rest','30s Sprint / 30s Rest','40s Sprint / 20s Rest','60s Recovery','40s Sprint / 20s Rest','30s Sprint / 30s Rest','20s Sprint / 40s Rest'],
+  'AMRAP Finisher':['10× Burpees','15× Air Squats','20× Mountain Climbers','10× Push-Ups','Repeat For 8min','Push the Pace','Last Round','Cool Down'],
+  'Hill Repeats':['5min Warm-Up','30s Hill Climb','60s Walk Down','30s Hill Climb','60s Walk Down','30s Hill Climb','60s Walk Down','5min Cool-Down'],
+  // Pilates
+  'Mat Basics':['Hundred (100 Pulses)','Roll-Up x8','Single Leg Circles','Rolling Like a Ball','Single Leg Stretch','Double Leg Stretch','Spine Stretch','Saw'],
+  'Core Series':['The Hundred','Roll-Up','Single Leg Stretch','Double Leg Stretch','Scissors','Lower Lift','Criss-Cross','Plank Hold'],
+  'Standing Pilates':['Tree Pose','Standing Leg Lifts','Side Leg Series (R)','Side Leg Series (L)','Standing Twist','Calf Raises','Standing Roll-Down','Mountain Pose'],
+  'Spine Articulation':['Pelvic Tilts','Bridge Lifts','Cat-Cow','Roll-Up','Spine Stretch Forward','Saw','Swan Prep','Child\'s Pose'],
+  'Full-Body Mat':['The Hundred','Roll-Up','Single Leg Circles','Rolling Like a Ball','Single Leg Stretch','Spine Stretch','Side Kicks (R)','Side Kicks (L)','Teaser Prep','Seal'],
+};
+
+const movementTypes=new Set(['movement','yoga','strength','cardio','hiit','pilates']);
+let cueInt=null;
+let mvCues=null,mvIdx=0;
+
+function startSessionCue(name){
+  clearInterval(cueInt);
+  mvCues=movementCycles[name]||null;
+  const bv=document.getElementById('breath-visual');
+  const bc=document.getElementById('breath-count');
+  const lbl=document.getElementById('breath-label');
+  if(mvCues){
+    // Tap-to-advance mode for movement sessions
+    mvIdx=0;
+    bv.style.display='flex';
+    bc.style.display='none';
+    bc.textContent='';
+    lbl.textContent=mvCues[0];
+    document.getElementById('cue-hint').style.display='';
+    return;
+  }
+  const cues=sessionCycles[name];
+  if(!cues){bv.style.display='none';return;}
+  bv.style.display='flex';
+  bc.style.display='none';
+  let idx=0,sec=0;
+  lbl.textContent=cues[0].l;
+  cueInt=setInterval(()=>{
+    if(!sRunning)return;
+    sec++;
+    if(sec>=cues[idx].d){
+      idx=(idx+1)%cues.length;
+      sec=0;
+      lbl.textContent=cues[idx].l;
+    }
+  },1000);
+}
+function stopSessionCue(){
+  clearInterval(cueInt);
+  mvCues=null;mvIdx=0;
+  const hint=document.getElementById('cue-hint');
+  if(hint)hint.style.display='none';
+}
+function advanceSessionCue(){
+  if(!mvCues||!sRunning)return;
+  mvIdx=(mvIdx+1)%mvCues.length;
+  document.getElementById('breath-label').textContent=mvCues[mvIdx];
+}
+function pressHalo(){
+  if(sPrimed){beginSession();return;}
+  if(sRunning && mvCues){advanceSessionCue();return;}
+  toggleSession();
+}
+const motionMode={
+  breathwork:'breath',
+  meditation:'drift',
+  sleep:'drift',
+  journal:'drift',
+  yoga:'tide',
+  pilates:'tide',
+  strength:'pulse',
+  hiit:'pulse',
+  movement:'surge',
+  cardio:'surge',
+};
+
+function setHaloMode(mode){
+  const r=document.getElementById('breath-ring');
+  r.classList.remove('mode-drift','mode-tide','mode-pulse','mode-surge');
+  if(mode==='breath')return;
+  r.classList.add('mode-'+mode);
+}
+
+// ── Open / control session ────────────────────────────
+function openSession(name,type,dur,grad){
+  const mins=parseInt(dur);sSec=mins*60;sTotal=mins*60;sRunning=false;sPrimed=true;
+  sCurrent={name,type,dur,grad};
+  document.getElementById('session-name').textContent=name;
+  document.getElementById('session-type-tag').textContent=type;
+  document.getElementById('halo-a1').style.background=auroraFromGrad(grad,0);
+  document.getElementById('halo-a2').style.background=auroraFromGrad(grad,180);
+  const copyEl=document.getElementById('session-copy');
+  if(copyEl){copyEl.style.display='none';copyEl.textContent='';}
+  const btn=document.getElementById('session-btn');
+  btn.textContent='Begin';btn.style.display='';
+  document.getElementById('session-overlay').style.display='flex';
+  clearInterval(sInt);
+  // Halo idles softly while primed — no breath cycle, no countdown yet
+  stopBreathCycle();stopSessionCue();
+  setHaloMode('drift');
+  // Show a "Get Ready" prompt in the halo center
+  const bv=document.getElementById('breath-visual');
+  bv.style.display='flex';
+  document.getElementById('breath-count').style.display='none';
+  document.getElementById('breath-count').textContent='';
+  document.getElementById('breath-label').textContent='Tap to Begin';
+}
+
+function beginSession(){
+  if(!sPrimed||!sCurrent)return;
+  sPrimed=false;
+  const {name,type,dur,grad}=sCurrent;
+  const btn=document.getElementById('session-btn');
+  const skipCountdown=(type==='sleep'||type==='meditation'||type==='journal');
+  const startNow=()=>{
+    sRunning=true;
+    btn.textContent='Pause';btn.style.opacity='';btn.style.pointerEvents='';
+    sInt=setInterval(()=>{
+      if(sRunning){sSec--;updateSD();if(sSec<=0){clearInterval(sInt);stopBreathCycle();stopSessionCue();completeSess(name,grad);}}
+    },1000);
+    if(type==='breathwork'){
+      setHaloMode('breath');
+      startBreathCycle(name,getGradMid(grad));
+    } else {
+      setHaloMode(motionMode[type]||'drift');
+      if(type==='sleep'){document.getElementById('breath-visual').style.display='none';}
+      else{startSessionCue(name);}
+    }
+  };
+  if(skipCountdown){startNow();return;}
+  btn.style.opacity='0.4';btn.style.pointerEvents='none';
+  const lbl=document.getElementById('breath-label');
+  const cnt=document.getElementById('breath-count');
+  cnt.style.display='';
+  lbl.textContent='Get Ready';
+  let n=3;cnt.textContent=n;
+  const cd=setInterval(()=>{
+    n--;
+    if(n<=0){clearInterval(cd);startNow();}
+    else{cnt.textContent=n;}
+  },1000);
+}
+
+function toggleSession(){
+  if(sPrimed){beginSession();return;}
+  sRunning=!sRunning;
+  document.getElementById('session-btn').textContent=sRunning?'Pause':'Resume';
+}
+
+function endSession(){
+  clearInterval(sInt);stopBreathCycle();stopSessionCue();
+  sPrimed=false;sRunning=false;sCurrent=null;
+  const btn=document.getElementById('session-btn');btn.style.opacity='';btn.style.pointerEvents='';
+  document.getElementById('session-overlay').style.display='none';
+}
+
+function completeSess(name,grad){
+  stopSessionCue();
+  document.getElementById('session-overlay').style.display='none';
+  document.getElementById('done-name').textContent=name;
+  document.getElementById('done-bg').style.cssText='position:absolute;inset:0;background:radial-gradient(ellipse 200px 200px at 50% 30%,'+getGradMid(grad)+' 0%,transparent 65%);opacity:0.25;pointer-events:none;';
+  document.getElementById('done-btn').style.cssText='background:'+grad+';border:none;border-radius:18px;padding:10px 22px;font-size:12px;font-weight:600;color:white;cursor:pointer;font-family:"Plus Jakarta Sans",-apple-system,sans-serif;';
+  document.getElementById('done-overlay').style.display='flex';
+  const c=document.getElementById('me-count');c.textContent=parseInt(c.textContent)+1;
+}
+
+function closeDone(){document.getElementById('done-overlay').style.display='none';}
+
+// ── Flo chat ──────────────────────────────────────────
+let floIdx=0;
+
+function floAvatar(){return '<div style="width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 32 32"><path d="M31.76,31.66c-8.51-4.9-14.83-11.64-15.67-29.29,0-.05-.04-.09-.1-.09s-.09.04-.1.09C15.06,20.01,8.74,26.75.24,31.66c-.18.1-.07.38.13.33,10.26-2.48,20.98-2.48,31.25,0,.2.05.31-.23.13-.33Z" fill="#a78bfa"/></svg></div>';}
+
+function escAttr(str){return String(str).replace(/'/g,"\\'").replace(/"/g,'&quot;');}
+
+// Rich session card — matches Today's Pick design system
+function richCard(s){
+  const grad=s.grad, name=escAttr(s.name), type=s.type, dur=s.dur;
+  const typeLabel=type.charAt(0).toUpperCase()+type.slice(1);
+  return `<div onclick="openSession('${name}','${type}','${dur}','${grad}')" style="border-radius:18px;overflow:hidden;position:relative;cursor:pointer;">
+    <div style="position:absolute;inset:0;background:${grad};"></div>
+    <div style="position:absolute;top:-18px;right:-18px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,0.22);filter:blur(28px);pointer-events:none;"></div>
+    <div style="position:relative;z-index:1;padding:13px 14px 12px;">
+      <div class="mono" style="font-size:8px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.85);margin-bottom:6px;display:flex;align-items:center;gap:5px;">
+        <div style="width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,0.9);"></div>${s.tag||'Recommended'}
+      </div>
+      <div style="font-size:15px;font-weight:700;color:#fff;letter-spacing:-.02em;line-height:1.2;margin-bottom:4px;">${s.name}</div>
+      <div class="mono" style="font-size:9px;color:rgba(255,255,255,0.82);margin-bottom:${s.desc?'8px':'10px'};">${dur.replace(' min',' Min')} · ${typeLabel}</div>
+      ${s.desc?`<div style="font-size:10.5px;color:rgba(255,255,255,0.78);line-height:1.45;margin-bottom:11px;">${s.desc}</div>`:''}
+      <div style="display:flex;justify-content:flex-end;">
+        <button class="pill-btn primary" style="height:24px;font-size:9px;padding:0 12px;" onclick="event.stopPropagation();openSession('${name}','${type}','${dur}','${grad}')">Start</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function floBubble(text){
+  return `<div style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:16px;border-bottom-left-radius:3px;padding:10px 13px;font-size:12px;color:rgba(255,255,255,0.82);line-height:1.5;">${text}</div>`;
+}
+
+function floReplyBlock(text,sessions){
+  const cards=(sessions||[]).map(richCard).join('<div style="height:7px;"></div>');
+  return `<div style="display:flex;flex-direction:column;gap:8px;max-width:230px;">${floBubble(text)}${cards?`<div style="display:flex;flex-direction:column;">${cards}</div>`:''}</div>`;
+}
+
+// Topic library — keyword → reply text + suggested sessions
+const floTopics=[
+  {match:/\b(hi|hey|hello|yo|sup|hiya)\b/i, text:["Hey. What's going on with you today?","Hi Rory. How's the body feeling right now?","Hey there. What do you need — calm, energy, or somewhere in between?"], skipCard:true},
+  {match:/\b(thanks|thank you|appreciate|cheers)\b/i, text:["Anytime. Come back when you need a reset.","Glad it landed. I'll be here.","Of course. The log will remember this one for next time."], skipCard:true},
+  {match:/\b(what (are|is) you|who are you|what (can|do) you do|how does this work|about (you|synergy))\b/i, text:["I'm Synergy — your check-in for body and mind. Tell me how you're feeling and I'll match you to a session that fits.","Think of me as a guide. I read what you tell me, point you to the right session, and track patterns over time on the Me tab."], skipCard:true},
+
+  {match:/stress|stressed|anxious|anxiety|overwhelm|panic|tense|tension|wound up|on edge|nervous|worried|worry|can'?t calm|frazzled|spiraling|spiraling/i,
+    text:"Background anxiety with no clear source usually means the nervous system is carrying more than usual. A few things tend to help.",
+    sessions:[
+      {name:'4-7-8 Breath for Anxiety',type:'breathwork',dur:'8 min',grad:'linear-gradient(135deg,#1e1b4b 0%,#4338ca 45%,#7c3aed 100%)',tag:'Calm The System',desc:'Long exhale slows the heart rate and signals safety to the body.'},
+      {name:'Body Scan',type:'meditation',dur:'10 min',grad:'linear-gradient(135deg,#0c4a6e,#0891b2)',tag:'Locate Tension',desc:'Move attention through the body — name where it\'s holding on.'},
+    ]},
+
+  {match:/can'?t sleep|insomnia|tired|exhausted|sleepy|wired|restless at night|won'?t sleep|trouble sleeping|3 ?am|wake up at|wind down|bedtime/i,
+    text:"Sleep struggles usually trace back to a nervous system that didn't get a chance to downshift. Let's slow it down.",
+    sessions:[
+      {name:'Wind-Down Scan',type:'sleep',dur:'12 min',grad:'linear-gradient(135deg,#042f4b,#0c4a6e)',tag:'For Tonight',desc:'A guided body scan designed to be done lying in bed with the lights off.'},
+      {name:'Yin Restorative',type:'yoga',dur:'25 min',grad:'linear-gradient(135deg,#7f1d1d,#4c1d95)',tag:'Pre-Sleep Reset',desc:'Long passive holds to release the day before lights out.'},
+    ]},
+
+  {match:/low energy|sluggish|drained|no energy|flat|heavy|lethargic|wiped|burnt out|burned out|fatigued/i,
+    text:"When energy is flat, the move usually isn't more rest — it's gentle activation. Get the system flowing first.",
+    sessions:[
+      {name:'Sun Salutation',type:'movement',dur:'10 min',grad:'linear-gradient(135deg,#78350f,#dc2626)',tag:'Wake The Body',desc:'Five rounds of breath-linked movement to bring blood flow back online.'},
+      {name:'Coherent Breath',type:'breathwork',dur:'6 min',grad:'linear-gradient(135deg,#1e1b4b,#0891b2)',tag:'Steady Lift',desc:'Five-in five-out — a small, sustainable energy boost without the crash.'},
+    ]},
+
+  {match:/can'?t focus|distracted|scattered|brain fog|fog|focus|concentrate|concentration|adhd|jumpy mind|monkey mind/i,
+    text:"Scattered focus usually means the mind has too many open tabs. Let's close a few before adding more.",
+    sessions:[
+      {name:'Focus Anchor',type:'meditation',dur:'8 min',grad:'linear-gradient(135deg,#0c4a6e,#0891b2)',tag:'Settle The Mind',desc:'Single-point attention — return to the breath every time you wander.'},
+      {name:'Box Breathing',type:'breathwork',dur:'4 min',grad:'linear-gradient(135deg,#4c1d95,#7c3aed)',tag:'Quick Reset',desc:'Four-count squares. Good before deep work or a hard conversation.'},
+    ]},
+
+  {match:/sad|down|blue|low mood|depressed|depressing|grief|grieving|lonely|disconnected|crying|cry|empty/i,
+    text:"Heaviness like that usually wants warmth, not pressure. Something gentle that meets you where you are.",
+    sessions:[
+      {name:'Loving Kindness',type:'meditation',dur:'10 min',grad:'linear-gradient(135deg,#4c1d95,#a855f7)',tag:'Soften',desc:'A practice of directing care inward and outward — small but it lands.'},
+      {name:'Gentle Morning Flow',type:'yoga',dur:'15 min',grad:'linear-gradient(135deg,#4c1d95,#b91c1c)',tag:'Move Through It',desc:'Slow, kind movement. Nothing to push through.'},
+    ]},
+
+  {match:/angry|pissed|mad|frustrat|rage|furious|irritated|annoyed|fed up/i,
+    text:"Anger has a lot of charge in it. Better to move it through the body than sit with it stewing.",
+    sessions:[
+      {name:'Kettlebell Circuit',type:'strength',dur:'20 min',grad:'linear-gradient(135deg,#713f12,#d97706)',tag:'Move The Charge',desc:'Three rounds, steady output. Burns off the edge without doubling down on it.'},
+      {name:'Tabata Sprint',type:'hiit',dur:'12 min',grad:'linear-gradient(135deg,#7f1d1d,#dc2626)',tag:'Discharge',desc:'Twenty on, ten off. Short, sharp, and over before you can overthink.'},
+    ]},
+
+  {match:/sore|stiff|tight|aching|hip|shoulder|back hurts|neck|sat too long|desk all day/i,
+    text:"Tightness from sitting tends to live in the hips and shoulders. A little mobility goes a long way.",
+    sessions:[
+      {name:'Hip Opener',type:'yoga',dur:'18 min',grad:'linear-gradient(135deg,#4c1d95,#b91c1c)',tag:'Release',desc:'Targeted holds for the hip flexors and outer hips after long sitting.'},
+      {name:'Mobility Flow',type:'movement',dur:'12 min',grad:'linear-gradient(135deg,#713f12,#4c1d95)',tag:'Loosen Up',desc:'Full-body ranges of motion to undo the desk shape.'},
+    ]},
+
+  {match:/lazy|can'?t start|procrastinat|stuck|unmotivated|no motivation|don'?t feel like|hard to begin/i,
+    text:"Lower the bar. The five-minute version is almost always enough to start the chain reaction.",
+    sessions:[
+      {name:'Walking Warm-Up',type:'movement',dur:'5 min',grad:'linear-gradient(135deg,#7f1d1d,#b91c1c)',tag:'Five Minutes',desc:'Just walking. Use it to find out what the body actually wants today.'},
+      {name:'Dynamic Stretch',type:'movement',dur:'10 min',grad:'linear-gradient(135deg,#7f1d1d,#dc2626)',tag:'Easy Entry',desc:'No equipment, no commitment. Stop after ten if that\'s all you have.'},
+    ]},
+
+  {match:/before bed|evening|tonight|wind down|night routine|pre[- ]?sleep/i,
+    text:"Evenings work best when the body knows the workday is over. Mark the transition.",
+    sessions:[
+      {name:'Sunset Wind-Down',type:'yoga',dur:'15 min',grad:'linear-gradient(135deg,#7c2d12,#4c1d95)',tag:'Close The Day',desc:'Slow stretches paired with long exhales. A clean handoff to sleep.'},
+      {name:'Evening Wind-Down',type:'journal',dur:'5 min',grad:'linear-gradient(135deg,#14532d,#4338ca)',tag:'Empty The Tabs',desc:'Three prompts to offload what\'s still rattling around.'},
+    ]},
+
+  {match:/morning|just woke|wake up|start (my|the) day|first thing/i,
+    text:"Morning is a window. Set the tone before the inputs start hitting.",
+    sessions:[
+      {name:'Sun Salutation',type:'movement',dur:'10 min',grad:'linear-gradient(135deg,#78350f,#dc2626)',tag:'Wake The Body',desc:'Breath-linked movement. Best done before phone, after water.'},
+      {name:'Morning Pages',type:'journal',dur:'8 min',grad:'linear-gradient(135deg,#14532d,#16a34a)',tag:'Clear The Head',desc:'Stream of consciousness. Don\'t edit. Don\'t reread.'},
+    ]},
+
+  {match:/meeting|interview|presentation|big day|public speaking|stage|on camera/i,
+    text:"Pre-performance nerves are a feature, not a bug — but you want them dialed in, not running the show.",
+    sessions:[
+      {name:'Box Breathing',type:'breathwork',dur:'4 min',grad:'linear-gradient(135deg,#4c1d95,#7c3aed)',tag:'Pre-Performance',desc:'Four equal counts. Steadies the voice and the heart rate.'},
+      {name:'Focus Anchor',type:'meditation',dur:'8 min',grad:'linear-gradient(135deg,#0c4a6e,#0891b2)',tag:'Center Up',desc:'A short anchor session to consolidate attention before you walk in.'},
+    ]},
+
+  {match:/workout|train|strong|push hard|lift|cardio|\brun\b|sweat|hiit|crush it|go hard/i,
+    text:"Already got the engine warm? Let's match it.",
+    sessions:[
+      {name:'Tabata Sprint',type:'hiit',dur:'12 min',grad:'linear-gradient(135deg,#7f1d1d,#dc2626)',tag:'Push',desc:'Eight rounds, twenty on / ten off. Pick a movement and commit.'},
+      {name:'Kettlebell Circuit',type:'strength',dur:'20 min',grad:'linear-gradient(135deg,#713f12,#d97706)',tag:'Build',desc:'Three rounds, steady output. Strength with conditioning baked in.'},
+    ]},
+
+  {match:/\b(yoga|vinyasa|flow|asana|sun salut)/i,
+    text:"Yoga's a good fit when you want movement and stillness in the same session.",
+    sessions:[
+      {name:'Vinyasa Sequence',type:'yoga',dur:'20 min',grad:'linear-gradient(135deg,#7f1d1d,#4c1d95)',tag:'Flow',desc:'Breath-linked movement at a steady pace. Builds heat without burning out.'},
+      {name:'Hatha Basics',type:'yoga',dur:'15 min',grad:'linear-gradient(135deg,#4c1d95,#b91c1c)',tag:'Foundation',desc:'Slower holds. Good for refining alignment without rushing.'},
+      {name:'Sun Salutation',type:'movement',dur:'10 min',grad:'linear-gradient(135deg,#78350f,#dc2626)',tag:'Quick Flow',desc:'Five rounds. Light heat, full body — the shortest path to feeling moved.'},
+    ]},
+
+  {match:/\b(want to move|need to move|move my body|get moving|moving|movement|active|exercise|workout time|something physical|do something)\b/i,
+    text:"Movement, no commitment to intensity yet. Pick a vibe.",
+    sessions:[
+      {name:'Vinyasa Sequence',type:'yoga',dur:'20 min',grad:'linear-gradient(135deg,#7f1d1d,#4c1d95)',tag:'Mid Intensity',desc:'Strength, stretch, and breath in one. A balanced session.'},
+      {name:'Sun Salutation',type:'movement',dur:'10 min',grad:'linear-gradient(135deg,#78350f,#dc2626)',tag:'Light',desc:'Five rounds of breath-linked movement. Wakes the body without pushing.'},
+      {name:'Kettlebell Circuit',type:'strength',dur:'20 min',grad:'linear-gradient(135deg,#713f12,#d97706)',tag:'Push It',desc:'Three rounds, steady output. The most you\'ll get in twenty minutes.'},
+    ]},
+
+  {match:/\b(stretch|mobility|loosen|limber|flexible|range of motion)\b/i,
+    text:"Mobility work pays off everywhere else. Pick the focus.",
+    sessions:[
+      {name:'Mobility Flow',type:'movement',dur:'12 min',grad:'linear-gradient(135deg,#713f12,#4c1d95)',tag:'Full Body',desc:'Ranges of motion across every major joint. Twelve minutes well spent.'},
+      {name:'Dynamic Stretch',type:'movement',dur:'10 min',grad:'linear-gradient(135deg,#7f1d1d,#dc2626)',tag:'Active',desc:'Movement-based stretching — better than static for waking up.'},
+      {name:'Hip Opener',type:'yoga',dur:'18 min',grad:'linear-gradient(135deg,#4c1d95,#b91c1c)',tag:'Targeted',desc:'Specifically for hips. The most common tightness from sitting.'},
+    ]},
+
+  {match:/\b(meditate|meditation|sit|mindful|mindfulness|stillness|silence|present|presence)\b/i,
+    text:"Sitting practice. Pick the technique that fits where you are.",
+    sessions:[
+      {name:'Mindfulness Sit',type:'meditation',dur:'10 min',grad:'linear-gradient(135deg,#065f46,#0891b2)',tag:'Classic',desc:'Open awareness. Notice what arises without trying to change it.'},
+      {name:'Body Scan',type:'meditation',dur:'10 min',grad:'linear-gradient(135deg,#0c4a6e,#0891b2)',tag:'Embodied',desc:'Move attention systematically through the body. Good when the mind\'s racing.'},
+      {name:'Loving Kindness',type:'meditation',dur:'10 min',grad:'linear-gradient(135deg,#4c1d95,#a855f7)',tag:'Warm',desc:'Direct goodwill inward and outward. Lighter than it sounds.'},
+    ]},
+
+  {match:/\b(breathe|breath|breathing|breathwork|just breathe)\b/i,
+    text:"Breath is the fastest lever you have on the nervous system. Pick one.",
+    sessions:[
+      {name:'Box Breathing',type:'breathwork',dur:'4 min',grad:'linear-gradient(135deg,#4c1d95,#7c3aed)',tag:'Balance',desc:'Four counts in, hold, out, hold. Used by Navy SEALs for a reason.'},
+      {name:'4-7-8 Breath for Anxiety',type:'breathwork',dur:'8 min',grad:'linear-gradient(135deg,#1e1b4b 0%,#4338ca 45%,#7c3aed 100%)',tag:'Calm',desc:'Long exhale dominates. Best for downshifting fast.'},
+      {name:'Coherent Breath',type:'breathwork',dur:'6 min',grad:'linear-gradient(135deg,#1e1b4b,#0891b2)',tag:'Steady',desc:'Five-in, five-out. Sustainable for any length of time.'},
+    ]},
+
+  {match:/journal|reflect|process|think through|write|figure out|sort (my|out) (head|thoughts)/i,
+    text:"Sometimes the only way through is onto the page. Pick a frame and start.",
+    sessions:[
+      {name:'Morning Pages',type:'journal',dur:'8 min',grad:'linear-gradient(135deg,#14532d,#16a34a)',tag:'Unload',desc:'Stream of consciousness. The point is volume, not insight.'},
+      {name:'Weekly Review',type:'journal',dur:'10 min',grad:'linear-gradient(135deg,#14532d,#4338ca)',tag:'Zoom Out',desc:'Look back across the week. Patterns show up here that you\'ll miss in real time.'},
+    ]},
+
+  {match:/grateful|gratitude|good day|happy|content|thankful/i,
+    text:"Worth marking the good ones — they're easy to lose track of otherwise.",
+    sessions:[
+      {name:'Gratitude Check',type:'journal',dur:'5 min',grad:'linear-gradient(135deg,#14532d,#16a34a)',tag:'Capture It',desc:'Three things, specific. Future you will be glad you wrote them down.'},
+    ]},
+
+  {match:/quick|fast|short|five min|5 min|2 min|don'?t have time|busy/i,
+    text:"Got you. Something under five minutes that still actually does something.",
+    sessions:[
+      {name:'Box Breathing',type:'breathwork',dur:'4 min',grad:'linear-gradient(135deg,#4c1d95,#7c3aed)',tag:'4 Minutes',desc:'Four counts in, hold, out, hold. Reset between calls or commits.'},
+      {name:'Walking Warm-Up',type:'movement',dur:'5 min',grad:'linear-gradient(135deg,#7f1d1d,#b91c1c)',tag:'5 Minutes',desc:'Just walking. The lowest-friction movement option.'},
+    ]},
+];
+
+const floDefaults=[
+  {text:"Tell me a bit more — body or mind? Energy up or down?", skipCard:true},
+  {text:"Want to move, sit, breathe, or write it out?", skipCard:true},
+  {text:"How much time do you have, and what's the goal — calm down, wake up, or just check in?", skipCard:true},
+  {text:"Say more about what's going on. The more specific, the better I can match you.", skipCard:true},
+];
+
+function pickReply(val){
+  for(const t of floTopics){
+    if(t.match.test(val)){
+      const text=Array.isArray(t.text)?t.text[Math.floor(Math.random()*t.text.length)]:t.text;
+      return {text, sessions:t.sessions||[], skipCard:t.skipCard};
+    }
+  }
+  const d=floDefaults[floIdx%floDefaults.length];floIdx++;
+  return {text:d.text, sessions:d.sessions||[], skipCard:d.skipCard};
+}
+
+function sendFlo(){
+  const input=document.getElementById('flo-input');
+  const val=input.value.trim();if(!val)return;
+  const c=document.getElementById('flo-msgs');
+  const s=document.getElementById('flo-scroll');
+  const um=document.createElement('div');um.style.cssText='display:flex;justify-content:flex-end;';
+  um.innerHTML='<div style="max-width:205px;background:rgba(109,40,217,0.45);border:1.5px solid rgba(139,92,246,0.6);border-radius:16px;border-bottom-right-radius:3px;padding:10px 13px;font-size:12px;color:rgba(255,255,255,0.95);line-height:1.5;">'+val+'</div>';
+  c.appendChild(um);input.value='';s.scrollTop=s.scrollHeight;
+  // typing indicator
+  const ti=document.createElement('div');ti.style.cssText='display:flex;gap:7px;align-items:flex-end;';
+  ti.innerHTML=floAvatar()+'<div style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:16px;border-bottom-left-radius:3px;padding:11px 14px;display:flex;gap:4px;"><div class="flo-dot"></div><div class="flo-dot" style="animation-delay:.15s"></div><div class="flo-dot" style="animation-delay:.3s"></div></div>';
+  c.appendChild(ti);s.scrollTop=s.scrollHeight;
+  setTimeout(()=>{
+    ti.remove();
+    const r=pickReply(val);
+    const fm=document.createElement('div');fm.style.cssText='display:flex;gap:7px;align-items:flex-end;';
+    if(r.skipCard||!r.sessions||!r.sessions.length){
+      fm.innerHTML=floAvatar()+floBubble(r.text);
+    } else {
+      fm.innerHTML=floAvatar()+floReplyBlock(r.text,r.sessions);
+    }
+    c.appendChild(fm);s.scrollTop=s.scrollHeight;
+  },720);
+}
+
+// ── Day detail ───────────────────────────────────────
+const daySessionPool=[
+  {grad:'linear-gradient(135deg,#1e1b4b,#4338ca)', tag:'Breathwork · 8 min',      name:'4-7-8 Breath for Anxiety', desc:'Afternoon wobble — used the long exhale to slow the heart rate down. Four cycles was enough to steady out.',  time:'2:14 PM', streak:'Day 4'},
+  {grad:'linear-gradient(135deg,#7f1d1d,#dc2626)', tag:'Movement · 15 min',       name:'Dynamic Stretch',          desc:'Loosened hips and shoulders before lunch. Body felt lighter for the rest of the day.',                   time:'11:48 AM', streak:'Day 2'},
+  {grad:'linear-gradient(135deg,#0c4a6e,#0891b2)', tag:'Meditation · 10 min',     name:'Mindfulness Sit',          desc:'Slow start to the morning. Noticed a lot of planning-thoughts and kept returning to the breath.',        time:'7:22 AM', streak:'Day 5'},
+  {grad:'linear-gradient(135deg,#4c1d95,#7c3aed)', tag:'Breathwork · 4 min',      name:'Box Breathing',            desc:'Quick reset between calls. Even counts made the next conversation feel noticeably less rushed.',         time:'3:45 PM', streak:'Day 6'},
+  {grad:'linear-gradient(135deg,#4c1d95,#b91c1c)', tag:'Yoga · 20 min',           name:'Vinyasa Sequence',         desc:'Moved with the breath. The spinal twists released tension from sitting too long yesterday.',             time:'6:10 PM', streak:'Day 3'},
+  {grad:'linear-gradient(135deg,#14532d,#16a34a)', tag:'Journal · 5 min',         name:'Morning Pages',            desc:'Unloaded what was rattling around before coffee. Ended up naming the thing that was bothering me.',       time:'6:50 AM', streak:'Day 1'},
+  {grad:'linear-gradient(135deg,#713f12,#d97706)', tag:'Strength · 20 min',       name:'Kettlebell Circuit',       desc:'Three rounds, steady pace. Finished sweaty and energized instead of wiped out.',                          time:'5:30 PM', streak:'Day 2'},
+  {grad:'linear-gradient(135deg,#042f4b,#0c4a6e)', tag:'Sleep · 10 min',          name:'Wind-Down Scan',           desc:'Worked through each muscle group before bed. Fell asleep within minutes of finishing.',                  time:'10:44 PM', streak:'Day 7'},
+  {grad:'linear-gradient(135deg,#7f1d1d,#4c1d95)', tag:'Yoga · 25 min',           name:'Yin Restorative',          desc:'Long holds. Settled into the poses without fighting them. Mind got quiet around the fifteen-minute mark.', time:'7:05 PM', streak:'Day 4'},
+  {grad:'linear-gradient(135deg,#065f46,#0891b2)', tag:'Meditation · 15 min',     name:'Open Awareness',           desc:'Sat with whatever came up. Less directing, more watching. A different kind of rest.',                    time:'1:20 PM', streak:'Day 3'},
+  {grad:'linear-gradient(135deg,#78350f,#dc2626)', tag:'Movement · 10 min',       name:'Sun Salutation',           desc:'Five rounds to shake off the morning stiffness. Breath and movement syncing felt effortless today.',     time:'8:15 AM', streak:'Day 5'},
+  {grad:'linear-gradient(135deg,#1e1b4b,#0891b2)', tag:'Breathwork · 6 min',      name:'Coherent Breath',          desc:'Five-in, five-out. Heart rate variability felt like it was climbing by the end of the session.',        time:'10:05 AM', streak:'Day 6'},
+  {grad:'linear-gradient(135deg,#14532d,#4338ca)', tag:'Journal · 8 min',         name:'Weekly Review',            desc:'Looked back across the week. Patterns showed up that I wouldn\'t have caught in real time.',             time:'8:40 PM', streak:'Day 1'},
+  {grad:'linear-gradient(135deg,#713f12,#4c1d95)', tag:'Movement · 12 min',       name:'Mobility Flow',            desc:'Full-body ranges of motion. Noticed how much the left hip had been holding onto.',                       time:'12:30 PM', streak:'Day 2'},
+];
+function pickDayEntry(seed){
+  const r=((seed*1103515245+12345)&0x7fffffff)%100;
+  if(r<11)return null;
+  return daySessionPool[((seed*6364136223846793005+1442695040888963407)&0x7fffffff)%daySessionPool.length];
+}
+
+function openDayOverlay(entry,day,month){
+  document.getElementById('day-grad-bg').style.background=entry.grad;
+  document.getElementById('day-num').textContent=day;
+  document.getElementById('day-month').textContent=month+' · 2026';
+  document.getElementById('day-tag').innerHTML='<span style="width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,0.9);display:inline-block;"></span>'+entry.tag;
+  document.getElementById('day-name').textContent=entry.name;
+  document.getElementById('day-desc').textContent=entry.desc;
+  document.getElementById('day-meta').innerHTML='<span>Logged '+entry.time+'</span><span>'+entry.streak+' streak</span>';
+  const o=document.getElementById('day-overlay');
+  o.style.display='flex';
+  o.style.animation='screenIn .2s cubic-bezier(.2,0,0,1)';
+}
+function closeDayOverlay(){
+  document.getElementById('day-overlay').style.display='none';
+}
+
+// ── Stat overlays ─────────────────────────────────────
+function bar(h,grad,dim,val,lbl){
+  return `<div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:0;">
+    <div class="mono" style="font-size:8px;color:rgba(255,255,255,${dim?'0.22':'0.55'});margin-bottom:4px;letter-spacing:-.01em;">${val}</div>
+    <div style="width:100%;height:${h}px;border-radius:4px 4px 2px 2px;background:${grad};opacity:${dim?'0.38':'1'};"></div>
+    <div class="mono" style="font-size:8px;color:rgba(255,255,255,0.22);margin-top:5px;">${lbl}</div>
+  </div>`;
+}
+
+function statRow(label,value,sub){
+  return `<div style="flex:1;">
+    <div class="mono" style="font-size:8px;color:rgba(255,255,255,0.28);letter-spacing:.08em;text-transform:uppercase;">${label}</div>
+    <div style="font-size:20px;font-weight:700;color:rgba(255,255,255,0.9);letter-spacing:-.03em;margin-top:3px;line-height:1;">${value}${sub?` <span class="mono" style="font-size:10px;font-weight:400;color:rgba(255,255,255,0.3);">${sub}</span>`:''}</div>
+  </div>`;
+}
+
+const statConfigs={
+  sleep:{
+    label:'AVG SLEEP',unit:'Hrs',value:'8.4',
+    accent:'linear-gradient(90deg,#042f4b,#0891b2)',
+    chart(){
+      const vals=[7.5,8.0,9.2,8.8,7.9,8.4,9.0],days=['M','T','W','T','F','S','S'];
+      const maxH=220,ref=Math.round(8/10*maxH);
+      const grad='linear-gradient(to top,#042f4b,#0891b2)';
+      const bars=vals.map((v,i)=>bar(Math.round(v/10*maxH),grad,i!==2,v,days[i])).join('');
+      // Stages: deep/rem/light — last 7 days average
+      const stages=[
+        {n:'Deep',    pct:22,c:'linear-gradient(90deg,#022c43,#075985)'},
+        {n:'REM',     pct:24,c:'linear-gradient(90deg,#075985,#0891b2)'},
+        {n:'Light',   pct:48,c:'linear-gradient(90deg,#0891b2,#22d3ee)'},
+        {n:'Awake',   pct:6, c:'linear-gradient(90deg,#1e293b,#475569)'},
+      ];
+      const stageBar=`<div style="display:flex;height:8px;border-radius:4px;overflow:hidden;margin-top:8px;">
+        ${stages.map(s=>`<div style="width:${s.pct}%;background:${s.c};"></div>`).join('')}
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
+        ${stages.map(s=>`<div style="display:flex;align-items:center;gap:5px;"><div style="width:6px;height:6px;border-radius:50%;background:${s.c};"></div><span class="mono" style="font-size:8px;color:rgba(255,255,255,0.45);letter-spacing:.05em;">${s.n.toUpperCase()} ${s.pct}%</span></div>`).join('')}
+      </div>`;
+      return `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
+          <div class="mono" style="font-size:9px;color:rgba(255,255,255,0.28);letter-spacing:.08em;">THIS WEEK</div>
+          <div class="mono" style="font-size:9px;color:rgba(34,211,238,0.78);letter-spacing:.05em;">▲ 4% VS LAST WEEK</div>
+        </div>
+        <div style="position:relative;">
+          <div style="position:absolute;bottom:${ref+18}px;left:0;right:0;height:1px;background:rgba(34,211,238,0.25);pointer-events:none;border-top:1px dashed rgba(34,211,238,0.3);"></div>
+          <div style="position:absolute;bottom:${ref+22}px;right:0;" class="mono"><span style="font-size:8px;color:rgba(34,211,238,0.6);letter-spacing:.05em;">8H GOAL</span></div>
+          <div style="display:flex;align-items:flex-end;gap:6px;padding-top:24px;">${bars}</div>
+        </div>
+        <div style="margin-top:24px;">
+          <div class="mono" style="font-size:9px;color:rgba(255,255,255,0.28);letter-spacing:.08em;margin-bottom:4px;">SLEEP STAGES · 7-DAY AVG</div>
+          ${stageBar}
+        </div>
+        <div style="margin-top:22px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);display:flex;gap:16px;">
+          ${statRow('BEST NIGHT','9.2','Hrs')}${statRow('GOAL HIT','6/7','Days')}${statRow('AVG BEDTIME','10:48','PM')}
+        </div>
+        <div style="margin-top:14px;padding:12px 14px;background:rgba(8,145,178,0.12);border:1px solid rgba(34,211,238,0.2);border-radius:12px;">
+          <div class="mono" style="font-size:8px;color:rgba(34,211,238,0.75);letter-spacing:.1em;margin-bottom:3px;">CLOSEST TO GOAL</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.85);line-height:1.5;">Sleep is your strongest metric this week — six of seven nights at or above your 8-hour target.</div>
+        </div>`;
+    }
+  },
+  mood:{
+    label:'MOOD SCORE',unit:'%',value:'74',
+    accent:'linear-gradient(90deg,#14532d,#16a34a)',
+    chart(){
+      const vals=[68,72,65,80,74,78,74],days=['M','T','W','T','F','S','S'];
+      const maxH=220,grad='linear-gradient(to top,#14532d,#16a34a)';
+      const bars=vals.map((v,i)=>bar(Math.round(v/100*maxH),grad,i!==3,v+'%',days[i])).join('');
+      const tags=[
+        {n:'Calm',    c:18,pct:90},
+        {n:'Focused', c:12,pct:60},
+        {n:'Tired',   c:7, pct:35},
+        {n:'Anxious', c:4, pct:20},
+        {n:'Restless',c:3, pct:15},
+      ];
+      const tagRows=tags.map(t=>`
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px;">
+          <div class="mono" style="font-size:9px;color:rgba(255,255,255,0.55);width:60px;flex-shrink:0;">${t.n}</div>
+          <div style="flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,0.05);overflow:hidden;">
+            <div style="height:100%;width:${t.pct}%;background:linear-gradient(90deg,#14532d,#16a34a);border-radius:3px;"></div>
+          </div>
+          <div class="mono" style="font-size:9px;color:rgba(255,255,255,0.35);width:16px;text-align:right;">${t.c}</div>
+        </div>`).join('');
+      return `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
+          <div class="mono" style="font-size:9px;color:rgba(255,255,255,0.28);letter-spacing:.08em;">THIS WEEK</div>
+          <div class="mono" style="font-size:9px;color:rgba(134,239,172,0.78);letter-spacing:.05em;">▲ 6 PTS VS LAST WEEK</div>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:6px;">${bars}</div>
+        <div style="margin-top:24px;">
+          <div class="mono" style="font-size:9px;color:rgba(255,255,255,0.28);letter-spacing:.08em;margin-bottom:10px;">FREQUENT TAGS · 30 DAYS</div>
+          ${tagRows}
+        </div>
+        <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);display:flex;gap:16px;">
+          ${statRow('PEAK DAY','80','%')}${statRow('30-DAY AVG','72','%')}${statRow('GOOD DAYS','21/30','')}
+        </div>`;
+    }
+  },
+  month:{
+    label:'THIS MONTH',unit:'Sessions',value:'12',
+    accent:'linear-gradient(90deg,#7f1d1d,#dc2626)',
+    chart(){
+      const cats=[
+        {n:'Breathwork',c:4,g:'linear-gradient(90deg,#1e1b4b,#4338ca)'},
+        {n:'Meditation', c:2,g:'linear-gradient(90deg,#0c4a6e,#0891b2)'},
+        {n:'Movement',   c:2,g:'linear-gradient(90deg,#7f1d1d,#dc2626)'},
+        {n:'Yoga',       c:1,g:'linear-gradient(90deg,#4c1d95,#b91c1c)'},
+        {n:'Sleep',      c:1,g:'linear-gradient(90deg,#042f4b,#0c4a6e)'},
+        {n:'Strength',   c:1,g:'linear-gradient(90deg,#7f1d1d,#991b1b)'},
+        {n:'Journal',    c:1,g:'linear-gradient(90deg,#1e3a5f,#2563eb)'},
+      ];
+      const max=Math.max(...cats.map(c=>c.c));
+      const rows=cats.map(c=>`
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <div class="mono" style="font-size:9px;color:rgba(255,255,255,0.5);width:74px;flex-shrink:0;">${c.n}</div>
+          <div style="flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,0.05);overflow:hidden;">
+            <div style="height:100%;width:${Math.round(c.c/max*100)}%;background:${c.g};border-radius:4px;"></div>
+          </div>
+          <div class="mono" style="font-size:9px;color:rgba(255,255,255,0.55);width:14px;text-align:right;">${c.c}</div>
+        </div>`).join('');
+      // Weekly sessions bars
+      const wk=[3,4,3,2],wkLbl=['W1','W2','W3','W4'];
+      const maxH=76,wkGrad='linear-gradient(to top,#7f1d1d,#dc2626)';
+      const wkBars=wk.map((v,i)=>bar(Math.round(v/5*maxH),wkGrad,i!==1,v,wkLbl[i])).join('');
+      return `<div class="mono" style="font-size:9px;color:rgba(255,255,255,0.28);letter-spacing:.08em;margin-bottom:14px;">BY CATEGORY</div>
+        ${rows}
+        <div style="margin-top:20px;">
+          <div class="mono" style="font-size:9px;color:rgba(255,255,255,0.28);letter-spacing:.08em;margin-bottom:10px;">SESSIONS PER WEEK</div>
+          <div style="display:flex;align-items:flex-end;gap:10px;">${wkBars}</div>
+        </div>
+        <div style="margin-top:22px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);display:flex;gap:16px;">
+          ${statRow('TOTAL TIME','98','Min')}${statRow('AVG / SESSION','8.2','Min')}${statRow('VS LAST MO','+3','')}
+        </div>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.06);display:flex;gap:16px;">
+          ${statRow('PERSONAL BEST','18','Sessions')}${statRow('TOP CATEGORY','Breath','')}${statRow('ON TRACK','Yes','')}
+        </div>`;
+    }
+  },
+  streak:{
+    label:'DAY STREAK',unit:'Days',value:'6',
+    accent:'linear-gradient(90deg,#4c1d95,#7c3aed)',
+    chart(){
+      // 28-day heatmap: single-hue intensity ramp
+      const intensity=[0,2,1,0,3,2,1, 2,3,1,2,0,3,2, 1,2,3,2,1,0,2, 3,3,2,3,2,3,3];
+      const cellBg=['rgba(255,255,255,0.035)','rgba(124,58,237,0.28)','rgba(124,58,237,0.6)','rgba(124,58,237,0.95)'];
+      const dots=intensity.map(n=>`
+        <div style="aspect-ratio:1;border-radius:6px;background:${cellBg[n]};${n===0?'border:1px solid rgba(255,255,255,0.06);':''}"></div>
+      `).join('');
+      const swatch=(i)=>`<div style="width:12px;height:12px;border-radius:3px;background:${cellBg[i]};${i===0?'border:1px solid rgba(255,255,255,0.06);':''}"></div>`;
+      return `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
+          <div class="mono" style="font-size:9px;color:rgba(255,255,255,0.28);letter-spacing:.08em;">LAST 28 DAYS</div>
+          <div class="mono" style="font-size:9px;color:rgba(196,181,253,0.8);letter-spacing:.05em;">6-DAY ACTIVE RUN</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;">${dots}</div>
+        <div style="margin-top:16px;display:flex;gap:6px;align-items:center;">
+          <span class="mono" style="font-size:8px;color:rgba(255,255,255,0.3);letter-spacing:.06em;margin-right:2px;">LESS</span>
+          ${swatch(0)}${swatch(1)}${swatch(2)}${swatch(3)}
+          <span class="mono" style="font-size:8px;color:rgba(255,255,255,0.3);letter-spacing:.06em;margin-left:2px;">MORE</span>
+        </div>
+        <div style="margin-top:22px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);display:flex;gap:16px;">
+          ${statRow('PERSONAL BEST','9','Days')}${statRow('ACTIVE DAYS','22/28','')}${statRow('AVG / DAY','1.4','Sess')}
+        </div>
+        <div style="margin-top:14px;padding:12px 14px;background:rgba(124,58,237,0.12);border:1px solid rgba(167,139,250,0.22);border-radius:12px;">
+          <div class="mono" style="font-size:8px;color:rgba(196,181,253,0.78);letter-spacing:.1em;margin-bottom:3px;">ON PACE</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.85);line-height:1.5;">Three more active days matches your personal best.</div>
+        </div>`;
+    }
+  }
+};
+
+function openStatOverlay(key){
+  const cfg=statConfigs[key];
+  document.getElementById('stat-ov-label').textContent=cfg.label;
+  document.getElementById('stat-ov-value').textContent=cfg.value;
+  document.getElementById('stat-ov-unit').textContent=cfg.unit;
+  document.getElementById('stat-ov-accent').style.background=cfg.accent;
+  document.getElementById('stat-ov-chart').innerHTML=cfg.chart();
+  const o=document.getElementById('stat-overlay');
+  o.style.display='flex';
+  o.style.animation='screenIn .22s cubic-bezier(.2,0,0,1)';
+}
+function closeStatOverlay(){
+  document.getElementById('stat-overlay').style.display='none';
+}
+
+function openProfile(){
+  const o=document.getElementById('profile-overlay');
+  o.style.display='flex';
+  o.style.animation='screenIn .22s cubic-bezier(.2,0,0,1)';
+  o.scrollTop=0;
+}
+function closeProfile(){document.getElementById('profile-overlay').style.display='none';}
+function toggleProfSwitch(el){el.classList.toggle('on');}
+
+// ── Me calendar ───────────────────────────────────────
+// Newest first (top → bottom). 2026 weekday starts (Mon-indexed): May=Fri(4), Apr=Wed(2), Mar=Sun(6), Feb=Sun(6)
+const months=['May','April','March','February'],mStarts=[4,2,6,6],mDays=[22,30,31,28];
+const cal=document.getElementById('cal');
+months.forEach((month,mi)=>{
+  const wrap=document.createElement('div');
+  const lbl=document.createElement('div');lbl.className='tertiary';lbl.style.cssText+=';margin-bottom:7px;';lbl.textContent=month;wrap.appendChild(lbl);
+  const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(7,1fr);gap:3px;';
+  ['M','T','W','T','F','S','S'].forEach(d=>{const h=document.createElement('div');h.style.cssText='font-size:7px;color:rgba(255,255,255,0.14);text-align:center;padding-bottom:4px;';h.textContent=d;grid.appendChild(h);});
+  for(let i=0;i<mStarts[mi];i++){const b=document.createElement('div');b.style.cssText='height:15px;border-radius:3px;';grid.appendChild(b);}
+  for(let d=1;d<=mDays[mi];d++){
+    const entry=pickDayEntry(mi*100+d);const cell=document.createElement('div');
+    if(entry){
+      cell.style.cssText=`height:15px;border-radius:3px;background:${entry.grad};cursor:pointer;transition:opacity .12s,transform .1s;`;
+      cell.onclick=()=>openDayOverlay(entry,d,month);
+      cell.onmouseenter=()=>{cell.style.opacity='.7';cell.style.transform='scale(1.15)';};
+      cell.onmouseleave=()=>{cell.style.opacity='1';cell.style.transform='scale(1)';};
+    } else {
+      cell.style.cssText='height:15px;border-radius:3px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);';
+    }
+    grid.appendChild(cell);
+  }
+  wrap.appendChild(grid);cal.appendChild(wrap);
+});
+</script>
+</body>
+</html>
