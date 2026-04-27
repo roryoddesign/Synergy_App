@@ -130,7 +130,7 @@ body{background:transparent;display:flex;justify-content:center;align-items:flex
 <div class="notch" id="notch"></div>
 
 <!-- ══════════════ SESSIONS ══════════════ -->
-<div class="screen active" id="screen-sessions">
+<div class="screen" id="screen-sessions">
   <div style="height:48px;"></div>
   <div style="padding:16px 20px 0;">
     <div class="mono" style="font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,0.18);margin-bottom:5px;">Tue, Apr 16</div>
@@ -163,7 +163,7 @@ body{background:transparent;display:flex;justify-content:center;align-items:flex
 </div>
 
 <!-- ══════════════ FLO ══════════════ -->
-<div class="screen" id="screen-flo">
+<div class="screen active" id="screen-flo">
   <div id="flo-scroll" style="flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;">
     <div style="height:48px;"></div>
     <div style="display:flex;flex-direction:column;align-items:center;padding:26px 24px 0;text-align:center;">
@@ -575,7 +575,7 @@ function renderSubcats(focus){
 }
 
 window.addEventListener('load',()=>{
-  switchTab('sessions');
+  switchTab('flo');
   selectFocus('mental');
 });
 
