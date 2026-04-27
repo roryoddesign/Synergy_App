@@ -1352,6 +1352,19 @@ months.forEach((month,mi)=>{
   }
   wrap.appendChild(grid);cal.appendChild(wrap);
 });
+
+// Forward mouse position to parent so a host page's custom cursor can track across the iframe boundary
+if(window.parent!==window){
+  // Hide system cursor inside the iframe so the host page's custom cursor is the only one visible
+  var hideCursor=document.createElement('style');
+  hideCursor.textContent='html,body,*{cursor:none!important;}';
+  document.head.appendChild(hideCursor);
+  document.addEventListener('mousemove',function(e){
+    window.parent.postMessage({type:'synergy-cursor',x:e.clientX,y:e.clientY,hover:!!(e.target&&e.target.closest&&e.target.closest('a,button,[onclick],[role="button"],.dock-icon,.brand-orb,.halo-core,.module-card,.session-card,.prof-row,.prof-toggle'))},'*');
+  });
+  document.addEventListener('mouseleave',function(){window.parent.postMessage({type:'synergy-cursor-leave'},'*');});
+  document.addEventListener('mouseenter',function(){window.parent.postMessage({type:'synergy-cursor-enter'},'*');});
+}
 </script>
 </body>
 </html>
